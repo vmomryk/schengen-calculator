@@ -1,0 +1,974 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#0a1628">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>Шенген Калькулятор</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=IBM+Plex+Mono:wght@300;400;500&family=IBM+Plex+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #05101f;
+    --surface: #0d1f35;
+    --surface2: #132840;
+    --border: #1e3d5c;
+    --accent: #00c8ff;
+    --accent2: #0075ff;
+    --green: #00e87a;
+    --red: #ff3b5c;
+    --amber: #ffb300;
+    --text: #e8f4ff;
+    --muted: #5a8aaa;
+    --font-display: 'Bebas Neue', sans-serif;
+    --font-mono: 'IBM Plex Mono', monospace;
+    --font-body: 'IBM Plex Sans', sans-serif;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font-body);
+    min-height: 100dvh;
+    overflow-x: hidden;
+    position: relative;
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background:
+      radial-gradient(ellipse 60% 40% at 80% 10%, rgba(0,200,255,0.07) 0%, transparent 60%),
+      radial-gradient(ellipse 50% 50% at 10% 80%, rgba(0,117,255,0.06) 0%, transparent 60%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .grid-bg {
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(0,200,255,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,200,255,0.03) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .app {
+    position: relative;
+    z-index: 1;
+    max-width: 440px;
+    margin: 0 auto;
+    padding: 0 0 80px;
+  }
+
+  /* HEADER */
+  header {
+    padding: 20px 20px 16px;
+    border-bottom: 1px solid var(--border);
+    background: rgba(5,16,31,0.9);
+    backdrop-filter: blur(12px);
+    position: sticky;
+    top: 0;
+    z-index: 10;
+  }
+
+  .header-top {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 2px;
+  }
+
+  .eu-flag {
+    width: 32px;
+    height: 22px;
+    border-radius: 3px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    overflow: hidden;
+  }
+
+  h1 {
+    font-family: var(--font-display);
+    font-size: 28px;
+    letter-spacing: 2px;
+    color: var(--accent);
+    line-height: 1;
+  }
+
+  .subtitle {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    color: var(--muted);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    padding-left: 42px;
+  }
+
+  /* SECTIONS */
+  .section {
+    margin: 20px 16px 0;
+  }
+
+  .section-label {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    color: var(--accent);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .section-label::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  /* ENTRY DATE */
+  .date-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 16px;
+  }
+
+  .date-label {
+    font-size: 11px;
+    color: var(--muted);
+    font-family: var(--font-mono);
+    margin-bottom: 8px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+
+  .date-input-wrap {
+    position: relative;
+  }
+
+  input[type="date"] {
+    width: 100%;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text);
+    font-family: var(--font-mono);
+    font-size: 16px;
+    padding: 12px 14px;
+    outline: none;
+    -webkit-appearance: none;
+    appearance: none;
+    transition: border-color 0.2s;
+  }
+
+  input[type="date"]:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 2px rgba(0,200,255,0.15);
+  }
+
+  input[type="date"]::-webkit-calendar-picker-indicator {
+    filter: invert(0.6) sepia(1) hue-rotate(180deg);
+    cursor: pointer;
+    width: 20px;
+    height: 20px;
+  }
+
+  /* PERIODS */
+  .period-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-top: 8px;
+  }
+
+  .period-item {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 12px 14px;
+    display: grid;
+    grid-template-columns: 1fr auto 1fr auto;
+    gap: 8px;
+    align-items: center;
+    animation: slideIn 0.25s ease;
+  }
+
+  @keyframes slideIn {
+    from { opacity: 0; transform: translateY(-8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .period-date-group {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+  }
+
+  .period-date-label {
+    font-size: 9px;
+    color: var(--muted);
+    font-family: var(--font-mono);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+
+  .period-date-input {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    color: var(--text);
+    font-family: var(--font-mono);
+    font-size: 13px;
+    padding: 7px 8px;
+    outline: none;
+    width: 100%;
+    transition: border-color 0.2s;
+  }
+
+  .period-date-input:focus {
+    border-color: var(--accent);
+  }
+
+  .period-date-input::-webkit-calendar-picker-indicator {
+    filter: invert(0.5) sepia(1) hue-rotate(180deg);
+    width: 14px;
+    height: 14px;
+  }
+
+  .period-arrow {
+    color: var(--muted);
+    font-size: 14px;
+    font-family: var(--font-mono);
+    padding-top: 18px;
+  }
+
+  .period-remove {
+    background: rgba(255,59,92,0.1);
+    border: 1px solid rgba(255,59,92,0.25);
+    color: var(--red);
+    border-radius: 6px;
+    width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 16px;
+    line-height: 1;
+    transition: all 0.15s;
+    margin-top: 14px;
+    flex-shrink: 0;
+    touch-action: manipulation;
+    -webkit-user-select: none;
+    user-select: none;
+  }
+
+  .period-remove:active {
+    background: rgba(255,59,92,0.25);
+    transform: scale(0.92);
+  }
+
+  .add-period-btn {
+    width: 100%;
+    background: transparent;
+    border: 1px dashed var(--border);
+    border-radius: 10px;
+    color: var(--muted);
+    font-family: var(--font-mono);
+    font-size: 12px;
+    letter-spacing: 1px;
+    padding: 12px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: all 0.2s;
+    touch-action: manipulation;
+    -webkit-appearance: none;
+  }
+
+  .add-period-btn:active {
+    background: rgba(0,200,255,0.05);
+    border-color: var(--accent);
+    color: var(--accent);
+    transform: scale(0.98);
+  }
+
+  .add-icon {
+    width: 18px;
+    height: 18px;
+    background: rgba(0,200,255,0.1);
+    border: 1px solid var(--border);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    color: var(--accent);
+  }
+
+  /* CALCULATE BUTTON */
+  .calc-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    width: calc(100% - 32px);
+    margin: 20px 16px 0;
+    padding: 16px;
+    background: linear-gradient(135deg, var(--accent2) 0%, var(--accent) 100%);
+    border: none;
+    border-radius: 12px;
+    color: var(--bg);
+    font-family: var(--font-display);
+    font-size: 22px;
+    letter-spacing: 3px;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+    transition: transform 0.15s, box-shadow 0.15s;
+    box-shadow: 0 4px 20px rgba(0,200,255,0.3);
+    touch-action: manipulation;
+    -webkit-appearance: none;
+  }
+
+  .calc-btn::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, white 0%, transparent 100%);
+    opacity: 0;
+    transition: opacity 0.2s;
+  }
+
+  .calc-btn:active {
+    transform: scale(0.97);
+    box-shadow: 0 2px 10px rgba(0,200,255,0.2);
+  }
+
+  /* RESULT */
+  .result-card {
+    margin: 20px 16px 0;
+    border-radius: 14px;
+    overflow: hidden;
+    animation: slideIn 0.3s ease;
+    border: 1px solid var(--border);
+  }
+
+  .result-header {
+    padding: 18px 20px 14px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+
+  .result-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+    flex-shrink: 0;
+  }
+
+  .result-allowed .result-header { background: rgba(0,232,122,0.08); }
+  .result-denied .result-header { background: rgba(255,59,92,0.08); }
+
+  .result-allowed .result-icon {
+    background: rgba(0,232,122,0.15);
+    border: 1px solid rgba(0,232,122,0.3);
+  }
+
+  .result-denied .result-icon {
+    background: rgba(255,59,92,0.15);
+    border: 1px solid rgba(255,59,92,0.3);
+  }
+
+  .result-verdict {
+    font-family: var(--font-display);
+    font-size: 26px;
+    letter-spacing: 2px;
+    line-height: 1.1;
+  }
+
+  .result-allowed .result-verdict { color: var(--green); }
+  .result-denied .result-verdict { color: var(--red); }
+
+  .result-sub {
+    font-size: 11px;
+    color: var(--muted);
+    font-family: var(--font-mono);
+    margin-top: 2px;
+  }
+
+  .result-body {
+    padding: 0 20px 18px;
+    background: var(--surface);
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .stat-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 12px;
+    background: var(--surface2);
+    border-radius: 8px;
+    border: 1px solid var(--border);
+  }
+
+  .stat-label {
+    font-size: 11px;
+    color: var(--muted);
+    font-family: var(--font-mono);
+    letter-spacing: 0.5px;
+  }
+
+  .stat-value {
+    font-family: var(--font-mono);
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text);
+  }
+
+  .stat-value.highlight { color: var(--accent); }
+  .stat-value.warn { color: var(--amber); }
+  .stat-value.danger { color: var(--red); }
+  .stat-value.safe { color: var(--green); }
+
+  /* Progress bar */
+  .progress-wrap {
+    padding: 0 20px 16px;
+    background: var(--surface);
+  }
+
+  .progress-label {
+    display: flex;
+    justify-content: space-between;
+    font-size: 10px;
+    color: var(--muted);
+    font-family: var(--font-mono);
+    margin-bottom: 6px;
+    letter-spacing: 0.5px;
+  }
+
+  .progress-bar {
+    height: 6px;
+    background: var(--surface2);
+    border-radius: 3px;
+    overflow: hidden;
+  }
+
+  .progress-fill {
+    height: 100%;
+    border-radius: 3px;
+    transition: width 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+    position: relative;
+  }
+
+  .progress-fill::after {
+    content: '';
+    position: absolute;
+    right: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 3px;
+    height: 10px;
+    background: inherit;
+    border-radius: 2px;
+    filter: brightness(1.5);
+  }
+
+  /* EXIT DATE */
+  .exit-card {
+    margin: 10px 16px 0;
+    background: var(--surface);
+    border: 1px solid rgba(255,179,0,0.3);
+    border-radius: 12px;
+    padding: 14px 16px;
+    animation: slideIn 0.35s ease;
+  }
+
+  .exit-title {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    color: var(--amber);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+
+  .exit-date {
+    font-family: var(--font-display);
+    font-size: 28px;
+    letter-spacing: 2px;
+    color: var(--amber);
+  }
+
+  .exit-note {
+    font-size: 11px;
+    color: var(--muted);
+    font-family: var(--font-mono);
+    margin-top: 4px;
+    line-height: 1.5;
+  }
+
+  /* ERROR */
+  .error-msg {
+    margin: 12px 16px 0;
+    background: rgba(255,59,92,0.08);
+    border: 1px solid rgba(255,59,92,0.25);
+    border-radius: 10px;
+    padding: 12px 14px;
+    font-size: 13px;
+    color: var(--red);
+    font-family: var(--font-mono);
+    animation: slideIn 0.2s ease;
+  }
+
+  /* NO PERIOD INFO */
+  .no-period-msg {
+    margin: 12px 16px 0;
+    background: rgba(0,200,255,0.06);
+    border: 1px solid rgba(0,200,255,0.2);
+    border-radius: 10px;
+    padding: 12px 14px;
+    font-size: 12px;
+    color: var(--accent);
+    font-family: var(--font-mono);
+    line-height: 1.6;
+    animation: slideIn 0.25s ease;
+  }
+
+  .no-period-msg span {
+    color: var(--muted);
+  }
+  .reset-btn {
+    display: block;
+    width: calc(100% - 32px);
+    margin: 12px 16px 0;
+    padding: 13px;
+    background: transparent;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    color: var(--muted);
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: all 0.2s;
+    touch-action: manipulation;
+    -webkit-appearance: none;
+  }
+
+  .reset-btn:active {
+    background: var(--surface);
+    color: var(--text);
+  }
+
+  .hidden { display: none !important; }
+
+  /* INFO MSG */
+  .no-period-msg {
+    margin: 12px 16px 0;
+    background: rgba(0,200,255,0.06);
+    border: 1px solid rgba(0,200,255,0.2);
+    border-radius: 10px;
+    padding: 12px 14px;
+    font-size: 12px;
+    color: var(--accent);
+    font-family: var(--font-mono);
+    line-height: 1.6;
+    animation: slideIn 0.25s ease;
+  }
+
+  .no-period-msg strong {
+    color: var(--text);
+  }
+
+
+
+  /* Scrollbar */
+  ::-webkit-scrollbar { width: 4px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+  /* Info hint */
+  .info-hint {
+    margin: 10px 16px 0;
+    padding: 10px 12px;
+    background: rgba(0,200,255,0.04);
+    border: 1px solid rgba(0,200,255,0.12);
+    border-radius: 8px;
+    font-size: 11px;
+    color: var(--muted);
+    font-family: var(--font-mono);
+    line-height: 1.6;
+  }
+
+  .info-hint strong {
+    color: var(--accent);
+    font-weight: 500;
+  }
+</style>
+</head>
+<body ontouchstart="">
+<div class="grid-bg"></div>
+<div class="app">
+
+  <header>
+    <div class="header-top">
+      <div class="eu-flag">
+        <svg width="32" height="22" viewBox="0 0 32 22" xmlns="http://www.w3.org/2000/svg">
+          <rect width="32" height="22" rx="3" fill="#003399"/>
+          <g fill="#FFCC00">
+            <polygon points="16,3 16.6,4.8 18.5,4.8 17,5.9 17.6,7.7 16,6.6 14.4,7.7 15,5.9 13.5,4.8 15.4,4.8" transform="scale(0.55) translate(13,1)"/>
+            <polygon points="16,3 16.6,4.8 18.5,4.8 17,5.9 17.6,7.7 16,6.6 14.4,7.7 15,5.9 13.5,4.8 15.4,4.8" transform="scale(0.55) translate(21,4)"/>
+            <polygon points="16,3 16.6,4.8 18.5,4.8 17,5.9 17.6,7.7 16,6.6 14.4,7.7 15,5.9 13.5,4.8 15.4,4.8" transform="scale(0.55) translate(24,12)"/>
+            <polygon points="16,3 16.6,4.8 18.5,4.8 17,5.9 17.6,7.7 16,6.6 14.4,7.7 15,5.9 13.5,4.8 15.4,4.8" transform="scale(0.55) translate(21,20)"/>
+            <polygon points="16,3 16.6,4.8 18.5,4.8 17,5.9 17.6,7.7 16,6.6 14.4,7.7 15,5.9 13.5,4.8 15.4,4.8" transform="scale(0.55) translate(13,23)"/>
+            <polygon points="16,3 16.6,4.8 18.5,4.8 17,5.9 17.6,7.7 16,6.6 14.4,7.7 15,5.9 13.5,4.8 15.4,4.8" transform="scale(0.55) translate(5,20)"/>
+            <polygon points="16,3 16.6,4.8 18.5,4.8 17,5.9 17.6,7.7 16,6.6 14.4,7.7 15,5.9 13.5,4.8 15.4,4.8" transform="scale(0.55) translate(2,12)"/>
+            <polygon points="16,3 16.6,4.8 18.5,4.8 17,5.9 17.6,7.7 16,6.6 14.4,7.7 15,5.9 13.5,4.8 15.4,4.8" transform="scale(0.55) translate(5,4)"/>
+          </g>
+        </svg>
+      </div>
+      <h1>ШЕНГЕН</h1>
+    </div>
+    <div class="subtitle">Калькулятор 90/180 днів</div>
+  </header>
+
+  <div class="info-hint">
+    Правило <strong>90/180</strong>: не більше <strong>90 днів</strong> перебування протягом останніх <strong>180 днів</strong>.
+  </div>
+
+  <!-- Entry date -->
+  <div class="section">
+    <div class="section-label">Запланований вʼїзд</div>
+    <div class="date-card">
+      <div class="date-label">Дата вʼїзду до Шенгену</div>
+      <input type="date" id="entryDate">
+    </div>
+  </div>
+
+  <!-- Periods -->
+  <div class="section">
+    <div class="section-label">Попередні перебування</div>
+    <button class="add-period-btn" id="addPeriodBtn" type="button">
+      <span class="add-icon">+</span>
+      ДОДАТИ ПЕРІОД
+    </button>
+    <div class="period-list" id="periodList"></div>
+  </div>
+
+  <button class="calc-btn" id="calcBtn" type="button">
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor" xmlns="http://www.w3.org/2000/svg" style="flex-shrink:0"><path d="M3 2.5l10 5.5-10 5.5V2.5z"/></svg>
+    РОЗРАХУВАТИ
+  </button>
+  <button class="reset-btn hidden" id="resetBtn" type="button">СКИНУТИ ВСЕ</button>
+
+  <div id="errorMsg" class="error-msg hidden"></div>
+  <div id="noPeriodMsg" class="no-period-msg hidden"></div>
+  <div id="resultCard" class="result-card hidden"></div>
+  <div id="exitCard" class="exit-card hidden"></div>
+
+</div>
+
+<script>
+  let periodCount = 0;
+
+  function addPeriod() {
+    periodCount++;
+    const id = periodCount;
+    const list = document.getElementById('periodList');
+    const item = document.createElement('div');
+    item.className = 'period-item';
+    item.id = `period-${id}`;
+    item.innerHTML = `
+      <div class="period-date-group">
+        <div class="period-date-label">Вʼїзд</div>
+        <input type="date" class="period-date-input" id="start-${id}">
+      </div>
+      <div class="period-arrow">→</div>
+      <div class="period-date-group">
+        <div class="period-date-label">Виїзд</div>
+        <input type="date" class="period-date-input" id="end-${id}">
+      </div>
+      <div class="period-remove" data-id="${id}">×</div>
+    `;
+    list.prepend(item);
+  }
+
+  function removePeriod(id) {
+    const el = document.getElementById(`period-${id}`);
+    if (el) {
+      el.style.animation = 'none';
+      el.style.transition = 'opacity 0.2s, transform 0.2s';
+      el.style.opacity = '0';
+      el.style.transform = 'translateX(20px)';
+      setTimeout(() => el.remove(), 200);
+    }
+  }
+
+  function parseDate(str) {
+    if (!str) return null;
+    const [y, m, d] = str.split('-').map(Number);
+    return new Date(y, m - 1, d);
+  }
+
+  function formatDate(date) {
+    if (!date) return '—';
+    const d = String(date.getDate()).padStart(2, '0');
+    const m = String(date.getMonth() + 1).padStart(2, '0');
+    const y = date.getFullYear();
+    return `${d}.${m}.${y}`;
+  }
+
+  function daysBetween(a, b) {
+    return Math.round((b - a) / 86400000);
+  }
+
+  function addDays(date, n) {
+    const d = new Date(date);
+    d.setDate(d.getDate() + n);
+    return d;
+  }
+
+  function showError(msg) {
+    const el = document.getElementById('errorMsg');
+    el.textContent = msg;
+    el.classList.remove('hidden');
+    document.getElementById('resultCard').classList.add('hidden');
+    document.getElementById('exitCard').classList.add('hidden');
+    document.getElementById('noPeriodMsg').classList.add('hidden');
+  }
+
+  function hideError() {
+    document.getElementById('errorMsg').classList.add('hidden');
+  }
+
+  function calculate() {
+    hideError();
+
+    // Get entry date
+    const entryStr = document.getElementById('entryDate').value;
+    if (!entryStr) {
+      showError('⚠ Будь ласка, вкажіть дату запланованого вʼїзду.');
+      return;
+    }
+    const entryDate = parseDate(entryStr);
+
+    // Get periods
+    const periods = [];
+    const items = document.querySelectorAll('.period-item');
+    for (const item of items) {
+      const id = item.id.replace('period-', '');
+      const startStr = document.getElementById(`start-${id}`).value;
+      const endStr = document.getElementById(`end-${id}`).value;
+      if (!startStr || !endStr) {
+        showError('⚠ Будь ласка, заповніть усі дати в усіх періодах (або видаліть порожні).');
+        return;
+      }
+      const start = parseDate(startStr);
+      const end = parseDate(endStr);
+      if (start > end) {
+        showError('⚠ Дата вʼїзду не може бути пізніше дати виїзду у одному з періодів.');
+        return;
+      }
+      if (end >= entryDate) {
+        showError('⚠ Дата виїзду попереднього перебування повинна бути до дати запланованого вʼїзду.');
+        return;
+      }
+      periods.push({ start, end });
+    }
+
+    // Window: 185 days before entry date
+    const windowStart = addDays(entryDate, -179); // entryDate - 179 days = 180-day window start
+
+    // Count days spent in Schengen within the window [windowStart .. entryDate-1]
+    let daysInWindow = 0;
+    for (const p of periods) {
+      // Overlap with window
+      const overlapStart = p.start < windowStart ? windowStart : p.start;
+      const overlapEnd = p.end < entryDate ? p.end : addDays(entryDate, -1);
+      if (overlapStart <= overlapEnd) {
+        daysInWindow += daysBetween(overlapStart, overlapEnd) + 1;
+      }
+    }
+
+    const remainingDays = 90 - daysInWindow;
+    const allowed = remainingDays > 0;
+
+    // Calculate mandatory exit date
+    // On entry day, person starts using days from the new trip.
+    // The 185-day window slides. We need to find the last day (exitDate) such that
+    // within [exitDate-184 .. exitDate], total days <= 90.
+    // Simple approach: exitDate = entryDate + (remainingDays - 1)
+    // But we also need to account for the sliding window — as entry date advances,
+    // old periods drop out of the window.
+    // For simplicity and correctness in most cases, use the sliding window approach:
+
+    let exitDate = null;
+    if (allowed) {
+      // Find the maximum stay: iterate day by day from entryDate
+      let currentDay = new Date(entryDate);
+      let daysUsed = 0;
+
+      while (true) {
+        // On currentDay, check days in window [currentDay-184 .. currentDay]
+        const winStart = addDays(currentDay, -179);
+        let total = 0;
+
+        // Past periods
+        for (const p of periods) {
+          const oStart = p.start < winStart ? winStart : p.start;
+          const oEnd = p.end < currentDay ? p.end : currentDay;
+          if (oStart <= oEnd) {
+            total += daysBetween(oStart, oEnd) + 1;
+          }
+        }
+
+        // Current trip days (entryDate .. currentDay)
+        total += daysBetween(entryDate, currentDay) + 1;
+
+        if (total > 90) {
+          // Yesterday was the last valid day
+          exitDate = addDays(currentDay, -1);
+          break;
+        }
+
+        // Safety: max 365 days forward
+        if (daysBetween(entryDate, currentDay) >= 365) {
+          exitDate = currentDay;
+          break;
+        }
+
+        currentDay = addDays(currentDay, 1);
+      }
+    }
+
+    // Render result
+    const noPeriods = periods.length === 0;
+    renderResult(allowed, daysInWindow, remainingDays, entryDate, exitDate, windowStart, noPeriods);
+    document.getElementById('resetBtn').classList.remove('hidden');
+  }
+
+  function renderResult(allowed, daysUsed, remaining, entryDate, exitDate, windowStart, noPeriods) {
+    const resultCard = document.getElementById('resultCard');
+    const exitCard = document.getElementById('exitCard');
+    const noPeriodMsg = document.getElementById('noPeriodMsg');
+
+    // Show/hide no-period info message
+    if (noPeriods) {
+      noPeriodMsg.innerHTML = `ℹ Попередніх візитів не вказано — розрахунок виконано за умови <strong>0 днів</strong> перебування у Шенгені протягом останніх 180 днів.`;
+      noPeriodMsg.classList.remove('hidden');
+    } else {
+      noPeriodMsg.classList.add('hidden');
+    }
+
+    const pct = Math.min(100, Math.round((daysUsed / 90) * 100));
+    const barColor = pct >= 90 ? 'var(--red)' : pct >= 70 ? 'var(--amber)' : 'var(--green)';
+    const valueClass = remaining <= 0 ? 'danger' : remaining <= 10 ? 'warn' : 'safe';
+
+    resultCard.className = `result-card ${allowed ? 'result-allowed' : 'result-denied'}`;
+    resultCard.innerHTML = `
+      <div class="result-header">
+        <div class="result-icon">${allowed ? '✓' : '✗'}</div>
+        <div>
+          <div class="result-verdict">${allowed ? 'ВʼЇЗД ДОЗВОЛЕНО' : 'ВʼЇЗД ЗАБОРОНЕНО'}</div>
+          <div class="result-sub">${allowed ? 'Ліміт не вичерпано' : 'Ліміт 90 днів перевищено або вичерпано'}</div>
+        </div>
+      </div>
+      <div class="progress-wrap">
+        <div class="progress-label">
+          <span>Використано за 180 днів</span>
+          <span>${daysUsed} / 90 днів (${pct}%)</span>
+        </div>
+        <div class="progress-bar">
+          <div class="progress-fill" style="width:${pct}%; background: linear-gradient(90deg, ${barColor}, ${barColor}aa);"></div>
+        </div>
+      </div>
+      <div class="result-body">
+        <div class="stat-row">
+          <div class="stat-label">Вікно аналізу (180 днів)</div>
+          <div class="stat-value highlight">${formatDate(windowStart)} — ${formatDate(entryDate)}</div>
+        </div>
+        <div class="stat-row">
+          <div class="stat-label">Днів використано у вікні</div>
+          <div class="stat-value ${daysUsed >= 90 ? 'danger' : daysUsed >= 75 ? 'warn' : ''}">${daysUsed} дн.</div>
+        </div>
+        <div class="stat-row">
+          <div class="stat-label">Залишилось днів</div>
+          <div class="stat-value ${valueClass}">${Math.max(0, remaining)} дн.</div>
+        </div>
+      </div>
+    `;
+    resultCard.classList.remove('hidden');
+
+    if (allowed && exitDate) {
+      const tripDays = Math.round((exitDate - entryDate) / 86400000) + 1;
+      exitCard.innerHTML = `
+        <div class="exit-title">⚠ Крайній день виїзду</div>
+        <div class="exit-date">${formatDate(exitDate)}</div>
+        <div class="exit-note">
+          Максимальне перебування у цій поїздці: <strong style="color:var(--amber)">${tripDays} дн.</strong><br>
+          Виїдьте не пізніше цієї дати, щоб не порушити правило 90/180.
+        </div>
+      `;
+      exitCard.classList.remove('hidden');
+    } else {
+      exitCard.classList.add('hidden');
+    }
+  }
+
+  function resetAll() {
+    document.getElementById('entryDate').value = '';
+    document.getElementById('periodList').innerHTML = '';
+    document.getElementById('resultCard').classList.add('hidden');
+    document.getElementById('exitCard').classList.add('hidden');
+    document.getElementById('resetBtn').classList.add('hidden');
+    document.getElementById('noPeriodMsg').classList.add('hidden');
+    hideError();
+    periodCount = 0;
+  }
+
+  // Set today as default entry date
+  const today = new Date();
+  const yyyy = today.getFullYear();
+  const mm = String(today.getMonth() + 1).padStart(2, '0');
+  const dd = String(today.getDate()).padStart(2, '0');
+  document.getElementById('entryDate').value = `${yyyy}-${mm}-${dd}`;
+
+  // Event listeners — iOS Safari compatible (click alone is sufficient with touch-action: manipulation)
+  document.getElementById('addPeriodBtn').addEventListener('click', addPeriod);
+  document.getElementById('calcBtn').addEventListener('click', calculate);
+  document.getElementById('resetBtn').addEventListener('click', resetAll);
+
+  // Delegate remove button clicks
+  document.getElementById('periodList').addEventListener('click', function(e) {
+    const btn = e.target.closest('.period-remove');
+    if (btn) removePeriod(btn.dataset.id);
+  });
+</script>
+</body>
+</html>
