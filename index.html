@@ -344,9 +344,11 @@
   .progress-fill { height: 100%; border-radius: 3px; transition: width 0.5s ease; }
 
   .result-body { padding: 0 20px 18px; background: var(--surface); display: flex; flex-direction: column; gap: 10px; }
-  .stat-row { display: flex; align-items: center; justify-content: space-between; padding: 10px 12px; background: var(--surface2); border-radius: 8px; border: 1px solid var(--border); }
-  .stat-label { font-size: 13px; color: var(--muted); font-family: var(--font-mono); }
-  .stat-value { font-family: var(--font-mono); font-size: 14px; color: var(--text); }
+  .stat-row { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 10px 12px; background: var(--surface2); border-radius: 8px; border: 1px solid var(--border); flex-wrap: wrap; }
+  .stat-row-vertical { flex-direction: column; align-items: flex-start; gap: 4px; }
+  .stat-row-vertical .stat-value { text-align: left; }
+  .stat-label { font-size: 13px; color: var(--muted); font-family: var(--font-mono); flex-shrink: 0; }
+  .stat-value { font-family: var(--font-mono); font-size: 14px; color: var(--text); text-align: right; }
   .stat-value.highlight { color: var(--accent); }
   .stat-value.safe { color: var(--green); }
   .stat-value.warn { color: var(--amber); }
@@ -812,7 +814,7 @@
     el.textContent = msg;
     el.classList.remove('hidden');
     setTimeout(function() {
-      el.scrollIntoView({ behavior: 'smooth', block: 'end' });
+      window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
     }, 50);
   }
 
@@ -911,7 +913,7 @@
         '<div class="progress-bar"><div class="progress-fill" style="width:' + pct + '%;background:' + barColor + '"></div></div>' +
       '</div>' +
       '<div class="result-body">' +
-        '<div class="stat-row"><div class="stat-label">Вікно аналізу (180 днів)</div><div class="stat-value highlight">' + formatDate(windowStart) + ' — ' + formatDate(entryDate) + '</div></div>' +
+        '<div class="stat-row stat-row-vertical"><div class="stat-label">Період аналізу (180 днів)</div><div class="stat-value highlight">' + formatDate(windowStart) + ' — ' + formatDate(entryDate) + '</div></div>' +
         '<div class="stat-row"><div class="stat-label">Днів використано</div><div class="stat-value ' + (daysInWindow >= 90 ? 'danger' : daysInWindow >= 70 ? 'warn' : '') + '">' + daysInWindow + ' дн.</div></div>' +
         '<div class="stat-row"><div class="stat-label">Залишилось днів</div><div class="stat-value ' + valClass + '">' + Math.max(0, remaining) + ' дн.</div></div>' +
       '</div>';
