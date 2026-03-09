@@ -203,14 +203,16 @@
     border-radius: 6px;
     color: var(--text);
     font-family: var(--font-mono);
-    font-size: 13px;
-    padding: 7px 8px;
+    font-size: 11px;
+    padding: 0 6px;
     outline: none;
     width: 100%;
     height: 34px;
+    line-height: 34px;
     -webkit-appearance: none;
     appearance: none;
-    display: block;
+    display: flex;
+    align-items: center;
     box-sizing: border-box;
   }
 
@@ -405,8 +407,8 @@
   .popup-overlay {
     position: fixed;
     inset: 0;
-    background: rgba(0,0,0,0.7);
-    backdrop-filter: blur(4px);
+    background: rgba(0,0,0,0.4);
+    backdrop-filter: blur(1px);
     z-index: 100;
     display: flex;
     align-items: center;
@@ -651,26 +653,39 @@
     item.innerHTML =
       '<div class="period-date-group">' +
         '<div class="period-date-label">Вʼїзд</div>' +
-        '<input type="date" class="period-date-input" id="start-' + id + '" onchange="savePeriods()">' +
+        '<input type="date" class="period-date-input" id="start-' + id + '">' +
       '</div>' +
       '<div class="period-arrow">—</div>' +
       '<div class="period-date-group">' +
         '<div class="period-date-label">Виїзд</div>' +
-        '<input type="date" class="period-date-input" id="end-' + id + '" onchange="savePeriods()">' +
+        '<input type="date" class="period-date-input" id="end-' + id + '">' +
       '</div>' +
       '<button type="button" class="period-remove" onclick="removePeriod(' + id + ')">x</button>';
     list.prepend(item);
-    // Встановлюємо значення через JS після додавання в DOM
-    if (startVal) document.getElementById('start-' + id).value = startVal;
-    if (endVal) document.getElementById('end-' + id).value = endVal;
-    // Коли змінюється дата вʼїзду — оновлюємо мінімальну дату виїзду
-    document.getElementById('start-' + id).addEventListener('change', function() {
-      var endEl = document.getElementById('end-' + id);
+
+    var startEl = document.getElementById('start-' + id);
+    var endEl = document.getElementById('end-' + id);
+
+    // Встановлюємо збережені значення
+    if (startVal) startEl.value = startVal;
+    if (endVal) endEl.value = endVal;
+    // Відновлюємо min
+    if (startVal) endEl.min = startVal;
+
+    // Коли змінюється дата вʼїзду
+    startEl.addEventListener('change', function() {
       if (this.value) {
         endEl.min = this.value;
-        // Якщо поле виїзду порожнє або раніше дати вʼїзду — встановлюємо той самий день
-        if (!endEl.value || endEl.value < this.value) endEl.value = this.value;
+        // Автозаповнюємо виїзд тільки якщо поле порожнє або раніше вʼїзду
+        if (!endEl.value || endEl.value < this.value) {
+          endEl.value = this.value;
+        }
       }
+      savePeriods();
+    });
+
+    // Зберігаємо при зміні дати виїзду
+    endEl.addEventListener('change', function() {
       savePeriods();
     });
   }
@@ -701,11 +716,6 @@
         var id = parseInt(data[i].id);
         if (id > periodCount) periodCount = id;
         createPeriodItem(id, data[i].start, data[i].end);
-        // Відновлюємо min для поля виїзду
-        if (data[i].start) {
-          var endEl = document.getElementById('end-' + id);
-          if (endEl) endEl.min = data[i].start;
-        }
       }
     } catch(ex) {}
     updateResetBtn();
