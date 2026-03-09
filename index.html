@@ -82,6 +82,7 @@
   .header-top {
     display: flex;
     align-items: center;
+    justify-content: center;
     gap: 10px;
     margin-bottom: 2px;
   }
@@ -108,7 +109,7 @@
     color: var(--muted);
     letter-spacing: 1px;
     text-transform: uppercase;
-    padding-left: 42px;
+    text-align: center;
   }
 
   .section { margin: 20px 16px 0; }
@@ -206,8 +207,11 @@
     padding: 7px 8px;
     outline: none;
     width: 100%;
+    height: 34px;
     -webkit-appearance: none;
     appearance: none;
+    display: block;
+    box-sizing: border-box;
   }
 
   .period-date-input::-webkit-calendar-picker-indicator {
@@ -332,6 +336,7 @@
     border-radius: 12px;
     padding: 14px 16px;
     animation: slideIn 0.35s ease;
+    text-align: center;
   }
 
   .exit-title { font-family: var(--font-mono); font-size: 10px; color: var(--amber); letter-spacing: 2px; text-transform: uppercase; margin-bottom: 6px; }
@@ -395,9 +400,168 @@
   }
 
   .info-hint strong { color: var(--accent); font-weight: 500; }
+
+  /* POPUP */
+  .popup-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.7);
+    backdrop-filter: blur(4px);
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+  }
+
+  .popup {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    max-width: 400px;
+    width: 100%;
+    overflow: hidden;
+  }
+
+  .popup-header {
+    background: linear-gradient(135deg, var(--accent2), var(--accent));
+    padding: 16px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+  }
+
+  .popup-header h2 {
+    font-family: var(--font-display);
+    font-size: 22px;
+    letter-spacing: 2px;
+    color: var(--bg);
+    line-height: 1;
+  }
+
+  .popup-body {
+    padding: 18px 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .popup-step {
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+  }
+
+  .popup-step-num {
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: rgba(0,200,255,0.15);
+    border: 1px solid rgba(0,200,255,0.3);
+    color: var(--accent);
+    font-family: var(--font-mono);
+    font-size: 11px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+
+  .popup-step-text {
+    font-family: var(--font-body);
+    font-size: 13px;
+    color: var(--text);
+    line-height: 1.5;
+  }
+
+  .popup-step-text strong {
+    color: var(--accent);
+    font-weight: 500;
+  }
+
+  .popup-divider {
+    height: 1px;
+    background: var(--border);
+    margin: 2px 0;
+  }
+
+  .popup-note {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--muted);
+    line-height: 1.6;
+    padding: 10px 12px;
+    background: rgba(0,200,255,0.04);
+    border: 1px solid rgba(0,200,255,0.1);
+    border-radius: 8px;
+  }
+
+  .popup-btn {
+    width: 100%;
+    padding: 14px;
+    background: linear-gradient(135deg, var(--accent2), var(--accent));
+    border: none;
+    border-radius: 10px;
+    color: var(--bg);
+    font-family: var(--font-display);
+    font-size: 20px;
+    letter-spacing: 2px;
+    cursor: pointer;
+    margin-top: 4px;
+    -webkit-appearance: none;
+  }
 </style>
 </head>
 <body onclick="">
+
+<!-- POPUP -->
+<div class="popup-overlay" id="popupOverlay">
+  <div class="popup">
+    <div class="popup-header">
+      <div class="eu-flag" style="width:28px;height:20px;border-radius:2px;overflow:hidden;flex-shrink:0">
+        <svg width="28" height="20" viewBox="0 0 32 22" xmlns="http://www.w3.org/2000/svg">
+          <rect width="32" height="22" rx="3" fill="#003399"/>
+          <g fill="#FFCC00">
+            <polygon points="16,4.5 16.5,6 18,6 16.9,6.9 17.4,8.4 16,7.5 14.6,8.4 15.1,6.9 14,6 15.5,6" transform="rotate(0,16,11) translate(0,-4.5)"/>
+            <polygon points="16,4.5 16.5,6 18,6 16.9,6.9 17.4,8.4 16,7.5 14.6,8.4 15.1,6.9 14,6 15.5,6" transform="rotate(30,16,11) translate(0,-4.5)"/>
+            <polygon points="16,4.5 16.5,6 18,6 16.9,6.9 17.4,8.4 16,7.5 14.6,8.4 15.1,6.9 14,6 15.5,6" transform="rotate(60,16,11) translate(0,-4.5)"/>
+            <polygon points="16,4.5 16.5,6 18,6 16.9,6.9 17.4,8.4 16,7.5 14.6,8.4 15.1,6.9 14,6 15.5,6" transform="rotate(90,16,11) translate(0,-4.5)"/>
+            <polygon points="16,4.5 16.5,6 18,6 16.9,6.9 17.4,8.4 16,7.5 14.6,8.4 15.1,6.9 14,6 15.5,6" transform="rotate(120,16,11) translate(0,-4.5)"/>
+            <polygon points="16,4.5 16.5,6 18,6 16.9,6.9 17.4,8.4 16,7.5 14.6,8.4 15.1,6.9 14,6 15.5,6" transform="rotate(150,16,11) translate(0,-4.5)"/>
+            <polygon points="16,4.5 16.5,6 18,6 16.9,6.9 17.4,8.4 16,7.5 14.6,8.4 15.1,6.9 14,6 15.5,6" transform="rotate(180,16,11) translate(0,-4.5)"/>
+            <polygon points="16,4.5 16.5,6 18,6 16.9,6.9 17.4,8.4 16,7.5 14.6,8.4 15.1,6.9 14,6 15.5,6" transform="rotate(210,16,11) translate(0,-4.5)"/>
+            <polygon points="16,4.5 16.5,6 18,6 16.9,6.9 17.4,8.4 16,7.5 14.6,8.4 15.1,6.9 14,6 15.5,6" transform="rotate(240,16,11) translate(0,-4.5)"/>
+            <polygon points="16,4.5 16.5,6 18,6 16.9,6.9 17.4,8.4 16,7.5 14.6,8.4 15.1,6.9 14,6 15.5,6" transform="rotate(270,16,11) translate(0,-4.5)"/>
+            <polygon points="16,4.5 16.5,6 18,6 16.9,6.9 17.4,8.4 16,7.5 14.6,8.4 15.1,6.9 14,6 15.5,6" transform="rotate(300,16,11) translate(0,-4.5)"/>
+            <polygon points="16,4.5 16.5,6 18,6 16.9,6.9 17.4,8.4 16,7.5 14.6,8.4 15.1,6.9 14,6 15.5,6" transform="rotate(330,16,11) translate(0,-4.5)"/>
+          </g>
+        </svg>
+      </div>
+      <h2>ЯК КОРИСТУВАТИСЬ</h2>
+    </div>
+    <div class="popup-body">
+      <div class="popup-step">
+        <div class="popup-step-num">1</div>
+        <div class="popup-step-text">Вкажіть <strong>дату запланованого вʼїзду</strong> до Шенгенської зони.</div>
+      </div>
+      <div class="popup-step">
+        <div class="popup-step-num">2</div>
+        <div class="popup-step-text">Натисніть <strong>«Додати період»</strong> і введіть дати всіх попередніх перебувань у Шенгені за останні 180 днів. Якщо поїздок не було — пропустіть цей крок.</div>
+      </div>
+      <div class="popup-step">
+        <div class="popup-step-num">3</div>
+        <div class="popup-step-text">Натисніть <strong>«Розрахувати»</strong> — додаток покаже чи Вам дозволений вʼїзд та крайню дату виїзду.</div>
+      </div>
+      <div class="popup-divider"></div>
+      <div class="popup-note">
+        Введені періоди зберігаються автоматично і будуть доступні при наступному відкритті. Щоб видалити всі дані — натисніть «Скинути все».
+      </div>
+      <button type="button" class="popup-btn" onclick="closePopup()">ЗРОЗУМІЛО</button>
+    </div>
+  </div>
+</div>
 <div class="grid-bg"></div>
 <div class="app">
 
@@ -463,6 +627,10 @@
 <script>
   var periodCount = 0;
 
+  function closePopup() {
+    document.getElementById('popupOverlay').classList.add('hidden');
+  }
+
   function savePeriods() {
     var items = document.querySelectorAll('.period-item');
     var data = [];
@@ -495,17 +663,33 @@
     // Встановлюємо значення через JS після додавання в DOM
     if (startVal) document.getElementById('start-' + id).value = startVal;
     if (endVal) document.getElementById('end-' + id).value = endVal;
+    // Коли змінюється дата вʼїзду — оновлюємо мінімальну дату виїзду
+    document.getElementById('start-' + id).addEventListener('change', function() {
+      var endEl = document.getElementById('end-' + id);
+      if (this.value) {
+        endEl.min = this.value;
+        // Якщо поле виїзду порожнє або раніше дати вʼїзду — встановлюємо той самий день
+        if (!endEl.value || endEl.value < this.value) endEl.value = this.value;
+      }
+      savePeriods();
+    });
+  }
+
+  function updateResetBtn() {
+    var hasPeriods = document.querySelectorAll('.period-item').length > 0;
+    document.getElementById('resetBtn').classList.toggle('hidden', !hasPeriods);
   }
 
   function addPeriod() {
     periodCount++;
     createPeriodItem(periodCount, '', '');
     savePeriods();
+    updateResetBtn();
   }
 
   function removePeriod(id) {
     var el = document.getElementById('period-' + id);
-    if (el) { el.remove(); savePeriods(); }
+    if (el) { el.remove(); savePeriods(); updateResetBtn(); }
   }
 
   function loadPeriods() {
@@ -513,13 +697,18 @@
       var raw = localStorage.getItem('schengen_periods');
       if (!raw) return;
       var data = JSON.parse(raw);
-      // Завантажуємо в зворотному порядку, бо prepend перевертає
       for (var i = data.length - 1; i >= 0; i--) {
         var id = parseInt(data[i].id);
         if (id > periodCount) periodCount = id;
         createPeriodItem(id, data[i].start, data[i].end);
+        // Відновлюємо min для поля виїзду
+        if (data[i].start) {
+          var endEl = document.getElementById('end-' + id);
+          if (endEl) endEl.min = data[i].start;
+        }
       }
     } catch(ex) {}
+    updateResetBtn();
   }
 
   function parseDate(str) {
@@ -665,7 +854,13 @@
       ext.classList.add('hidden');
     }
 
-    document.getElementById('resetBtn').classList.remove('hidden');
+    // Скролимо до результатів
+    setTimeout(function() {
+      var target = document.getElementById('noPeriodMsg').classList.contains('hidden')
+        ? document.getElementById('resultCard')
+        : document.getElementById('noPeriodMsg');
+      target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 50);
   }
 
   function resetAll() {
