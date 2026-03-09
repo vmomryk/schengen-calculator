@@ -483,15 +483,18 @@
     item.innerHTML =
       '<div class="period-date-group">' +
         '<div class="period-date-label">Вʼїзд</div>' +
-        '<input type="date" class="period-date-input" id="start-' + id + '" value="' + (startVal || '') + '" onchange="savePeriods()">' +
+        '<input type="date" class="period-date-input" id="start-' + id + '" onchange="savePeriods()">' +
       '</div>' +
       '<div class="period-arrow">—</div>' +
       '<div class="period-date-group">' +
         '<div class="period-date-label">Виїзд</div>' +
-        '<input type="date" class="period-date-input" id="end-' + id + '" value="' + (endVal || '') + '" onchange="savePeriods()">' +
+        '<input type="date" class="period-date-input" id="end-' + id + '" onchange="savePeriods()">' +
       '</div>' +
       '<button type="button" class="period-remove" onclick="removePeriod(' + id + ')">x</button>';
     list.prepend(item);
+    // Встановлюємо значення через JS після додавання в DOM
+    if (startVal) document.getElementById('start-' + id).value = startVal;
+    if (endVal) document.getElementById('end-' + id).value = endVal;
   }
 
   function addPeriod() {
