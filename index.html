@@ -222,15 +222,18 @@
     color: var(--text);
     font-family: var(--font-mono);
     font-size: 12px;
-    padding: 7px 6px;
+    padding: 0 6px;
     outline: none;
     width: 100%;
     height: 34px;
     -webkit-appearance: none;
     appearance: none;
-    display: block;
+    display: flex;
+    align-items: center;
     box-sizing: border-box;
     text-align: center;
+    vertical-align: middle;
+    line-height: 34px;
   }
 
   .period-date-input::-webkit-calendar-picker-indicator {
@@ -699,18 +702,52 @@
     startEl.addEventListener('change', function() {
       if (this.value) {
         endEl.min = this.value;
-        // Автозаповнюємо виїзд тільки якщо поле порожнє або раніше вʼїзду
-        if (!endEl.value || endEl.value < this.value) {
+        // Якщо виїзд вже вказаний і раніше вʼїзду — скидаємо
+        if (endEl.value && endEl.value < this.value) {
+          endEl.value = '';
+        }
+        // Встановлюємо value щоб календар відкрився на правильній даті,
+        // але лише якщо поле виїзду порожнє
+        if (!endEl.value) {
           endEl.value = this.value;
+          // Одразу скидаємо значення — воно потрібне лише щоб браузер
+          // запамʼятав позицію календаря
+          endEl.dataset.defaultDate = this.value;
+          endEl.value = '';
         }
       }
       savePeriods();
+    });
+
+    // Коли користувач фокусується на полі виїзду — підставляємо дефолтну дату
+    // щоб календар відкрився на потрібному місяці, але не зберігаємо її
+    endEl.addEventListener('focus', function() {
+      if (!this.value && this.dataset.defaultDate) {
+        this.value = this.dataset.defaultDate;
+      }
+    });
+
+    // Якщо користувач закрив календар не вибравши дату — очищаємо
+    endEl.addEventListener('blur', function() {
+      if (this.value === this.dataset.defaultDate) {
+        this.value = '';
+      }
     });
 
     // Зберігаємо при зміні дати виїзду
     endEl.addEventListener('change', function() {
       savePeriods();
     });
+  }
+
+  function renumberPeriods() {
+    var items = document.querySelectorAll('.period-item');
+    for (var i = 0; i < items.length; i++) {
+      // Елементи в DOM йдуть зверху вниз, але новіші зверху — тому номер = items.length - i
+      var num = items.length - i;
+      var titleEl = items[i].querySelector('.period-item-title');
+      if (titleEl) titleEl.textContent = 'Період ' + num;
+    }
   }
 
   function updateResetBtn() {
@@ -723,11 +760,12 @@
     createPeriodItem(periodCount, '', '');
     savePeriods();
     updateResetBtn();
+    renumberPeriods();
   }
 
   function removePeriod(id) {
     var el = document.getElementById('period-' + id);
-    if (el) { el.remove(); savePeriods(); updateResetBtn(); }
+    if (el) { el.remove(); savePeriods(); updateResetBtn(); renumberPeriods(); }
   }
 
   function loadPeriods() {
@@ -742,6 +780,7 @@
       }
     } catch(ex) {}
     updateResetBtn();
+    renumberPeriods();
   }
 
   function parseDate(str) {
@@ -772,6 +811,9 @@
     var el = document.getElementById('errorMsg');
     el.textContent = msg;
     el.classList.remove('hidden');
+    setTimeout(function() {
+      el.scrollIntoView({ behavior: 'smooth', block: 'end' });
+    }, 50);
   }
 
   function calculate() {
