@@ -282,42 +282,44 @@
     backdrop-filter: blur(3px);
     z-index: 200;
     display: flex;
-    align-items: flex-end;
+    align-items: center;
     justify-content: center;
+    padding: 16px;
   }
 
   .cal-sheet {
     background: var(--surface);
     border: 1px solid var(--border);
-    border-radius: 20px 20px 0 0;
+    border-radius: 16px;
     width: 100%;
-    max-width: 440px;
-    padding: 16px 16px 32px;
-    animation: slideUp 0.3s ease;
+    max-width: 360px;
+    padding: 14px 0 16px;
+    animation: fadeScaleIn 0.2s ease;
   }
 
-  @keyframes slideUp {
-    from { transform: translateY(100%); }
-    to { transform: translateY(0); }
+  @keyframes fadeScaleIn {
+    from { opacity: 0; transform: scale(0.95); }
+    to { opacity: 1; transform: scale(1); }
   }
 
   .cal-header {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    margin-bottom: 12px;
+    margin-bottom: 8px;
+    padding: 0 14px;
   }
 
   .cal-title {
     font-family: var(--font-display);
-    font-size: 20px;
+    font-size: 18px;
     letter-spacing: 2px;
     color: var(--accent);
   }
 
   .cal-nav {
     display: flex;
-    gap: 8px;
+    gap: 6px;
   }
 
   .cal-nav-btn {
@@ -325,131 +327,160 @@
     border: 1px solid var(--border);
     border-radius: 6px;
     color: var(--text);
-    width: 32px;
-    height: 32px;
+    width: 28px;
+    height: 28px;
     display: flex;
     align-items: center;
     justify-content: center;
     cursor: pointer;
-    font-size: 16px;
+    font-size: 15px;
     -webkit-appearance: none;
   }
 
   .cal-weekdays {
     display: grid;
     grid-template-columns: repeat(7, 1fr);
-    margin-bottom: 4px;
+    padding: 0 6px;
+    margin-bottom: 2px;
   }
 
   .cal-weekday {
     text-align: center;
-    font-size: 10px;
+    font-size: 9px;
     font-family: var(--font-mono);
     color: var(--muted);
-    padding: 4px 0;
+    padding: 2px 0;
     text-transform: uppercase;
   }
 
+  /* Фіксована сітка: завжди 6 рядків по 7 комірок */
   .cal-days {
     display: grid;
     grid-template-columns: repeat(7, 1fr);
-    gap: 2px;
+    grid-template-rows: repeat(6, 1fr);
+    padding: 0 6px;
+    height: 174px; /* 6 рядків × 29px */
   }
 
   .cal-day {
-    aspect-ratio: 1;
+    height: 29px;
     display: flex;
     align-items: center;
     justify-content: center;
     font-family: var(--font-mono);
-    font-size: 13px;
+    font-size: 12px;
     color: var(--text);
     cursor: pointer;
-    border-radius: 6px;
     position: relative;
     -webkit-tap-highlight-color: transparent;
+    user-select: none;
   }
 
-  .cal-day.empty { cursor: default; }
-  .cal-day.disabled { color: var(--border); cursor: default; }
-
-  .cal-day.in-range {
-    background: rgba(0,200,255,0.12);
-    border-radius: 0;
-  }
-
-  .cal-day.range-start, .cal-day.range-end {
-    background: var(--accent);
-    color: var(--bg);
-    border-radius: 6px;
-    font-weight: 500;
+  .cal-day-inner {
+    width: 26px;
+    height: 26px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    position: relative;
     z-index: 1;
+    flex-shrink: 0;
   }
 
-  .cal-day.range-start.in-range {
-    border-radius: 6px 0 0 6px;
-  }
+  .cal-day.empty { pointer-events: none; }
+  .cal-day.disabled { color: rgba(90,138,170,0.25); pointer-events: none; }
+  .cal-day.today .cal-day-inner { color: var(--accent); font-weight: 600; }
 
-  .cal-day.range-end.in-range {
-    border-radius: 0 6px 6px 0;
-  }
-
-  .cal-day.today::after {
+  /* Суцільний фон діапазону без gap */
+  .cal-day.in-range::before {
     content: '';
     position: absolute;
-    bottom: 3px;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 4px;
-    height: 4px;
-    border-radius: 50%;
-    background: var(--accent);
+    top: 2px; bottom: 2px;
+    left: -1px; right: -1px;
+    background: rgba(0,200,255,0.15);
+    z-index: 0;
   }
 
-  .cal-day.range-start.today::after,
-  .cal-day.range-end.today::after { background: var(--bg); }
+  /* Старт: коло + фон вправо */
+  .cal-day.start::before {
+    content: '';
+    position: absolute;
+    top: 2px; bottom: 2px;
+    left: 50%; right: -1px;
+    background: rgba(0,200,255,0.15);
+    z-index: 0;
+  }
+
+  /* Кінець: фон вліво + коло */
+  .cal-day.end::before {
+    content: '';
+    position: absolute;
+    top: 2px; bottom: 2px;
+    left: -1px; right: 50%;
+    background: rgba(0,200,255,0.15);
+    z-index: 0;
+  }
+
+  .cal-day.start.end::before { display: none; }
+
+  /* Округлення на краях тижня */
+  .cal-day.first-col.in-range::before { left: 4px; border-radius: 13px 0 0 13px; }
+  .cal-day.last-col.in-range::before  { right: 4px; border-radius: 0 13px 13px 0; }
+
+  /* Акцентне коло */
+  .cal-day.start .cal-day-inner,
+  .cal-day.end .cal-day-inner {
+    background: var(--accent);
+    color: var(--bg);
+    font-weight: 600;
+  }
 
   .cal-hint {
     text-align: center;
     font-size: 11px;
     font-family: var(--font-mono);
     color: var(--muted);
-    margin: 10px 0 12px;
-    min-height: 16px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    letter-spacing: 0.5px;
   }
+
+  .cal-hint.has-range { color: var(--accent); }
 
   .cal-actions {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
+    display: flex;
     gap: 8px;
-    margin-top: 4px;
+    padding: 0 14px;
+    justify-content: center;
   }
 
-  .cal-cancel {
-    padding: 13px;
-    background: transparent;
-    border: 1px solid var(--border);
+  .cal-cancel, .cal-save {
+    flex: 1;
+    padding: 11px;
     border-radius: 10px;
-    color: var(--muted);
     font-family: var(--font-mono);
     font-size: 12px;
     letter-spacing: 1px;
     cursor: pointer;
     -webkit-appearance: none;
+    text-align: center;
+  }
+
+  .cal-cancel {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--muted);
   }
 
   .cal-save {
-    padding: 13px;
     background: linear-gradient(135deg, var(--accent2), var(--accent));
     border: none;
-    border-radius: 10px;
     color: var(--bg);
-    font-family: var(--font-display);
-    font-size: 18px;
-    letter-spacing: 2px;
-    cursor: pointer;
-    -webkit-appearance: none;
-    opacity: 0.4;
+    font-weight: 600;
+    opacity: 0.35;
     transition: opacity 0.2s;
   }
 
@@ -1401,18 +1432,10 @@
     if (popupBtn) popupBtn.textContent = currentLang === 'ua' ? 'EN' : 'UA';
     // Оновлюємо назви periodів
     renumberPeriods();
-    // Оновлюємо підписи Вʼїзд/Виїзд в усіх periodах
-    document.querySelectorAll('.period-date-label-entry').forEach(function(el) { el.textContent = t('entry'); });
-    document.querySelectorAll('.period-date-label-exit').forEach(function(el) { el.textContent = t('exit'); });
-    // Оновлюємо відображення дат в усіх periodах
+    // Оновлюємо відображення дат і текст у всіх periodах
     document.querySelectorAll('.period-item').forEach(function(item) {
       var pid = item.id.replace('period-', '');
-      var startEl = document.getElementById('start-' + pid);
-      var endEl = document.getElementById('end-' + pid);
-      var startDisp = document.getElementById('start-display-' + pid);
-      var endDisp = document.getElementById('end-display-' + pid);
-      if (startDisp) startDisp.textContent = startEl && startEl.value ? formatDateShort(startEl.value) : '—';
-      if (endDisp) endDisp.textContent = endEl && endEl.value ? formatDateShort(endEl.value) : '—';
+      updatePeriodDisplay(pid);
     });
   }
 
@@ -1444,14 +1467,180 @@
     document.getElementById('popupOverlay').classList.add('hidden');
   }
 
+  // --- CALENDAR STATE ---
+  var calPeriodId = null;
+  var calStart = null;
+  var calEnd = null;
+  var calYear = 0;
+  var calMonth = 0;
+
+  function dateToStr(d) {
+    var m = d.getMonth() + 1;
+    var day = d.getDate();
+    return d.getFullYear() + '-' + (m < 10 ? '0' + m : m) + '-' + (day < 10 ? '0' + day : day);
+  }
+
+  function strToDate(s) {
+    var p = s.split('-');
+    return new Date(+p[0], +p[1] - 1, +p[2]);
+  }
+
+  function openCalendar(periodId, existingStart, existingEnd) {
+    calPeriodId = periodId;
+    calStart = existingStart || null;
+    calEnd = existingEnd || null;
+    var now = calStart ? strToDate(calStart) : new Date();
+    calYear = now.getFullYear();
+    calMonth = now.getMonth();
+    renderCalendar();
+    document.getElementById('calOverlay').classList.remove('hidden');
+  }
+
+  function calCancel() {
+    var item = document.getElementById('period-' + calPeriodId);
+    if (item) {
+      var s = item.getAttribute('data-start');
+      var e = item.getAttribute('data-end');
+      if (!s || !e) { item.remove(); savePeriods(); updateResetBtn(); renumberPeriods(); }
+    }
+    document.getElementById('calOverlay').classList.add('hidden');
+  }
+
+  function calSave() {
+    if (!calStart || !calEnd) return;
+    var item = document.getElementById('period-' + calPeriodId);
+    if (!item) return;
+    item.setAttribute('data-start', calStart);
+    item.setAttribute('data-end', calEnd);
+    updatePeriodDisplay(calPeriodId);
+    savePeriods();
+    document.getElementById('calOverlay').classList.add('hidden');
+  }
+
+  function calPrevMonth() {
+    calMonth--;
+    if (calMonth < 0) { calMonth = 11; calYear--; }
+    renderCalendar();
+  }
+
+  function calNextMonth() {
+    calMonth++;
+    if (calMonth > 11) { calMonth = 0; calYear++; }
+    renderCalendar();
+  }
+
+  function calSelectDay(str) {
+    if (!calStart || (calStart && calEnd)) {
+      calStart = str;
+      calEnd = null;
+    } else {
+      if (str < calStart) { calEnd = calStart; calStart = str; }
+      else { calEnd = str; }
+    }
+    renderCalendar();
+  }
+
+  function renderCalendar() {
+    var monthsUa = ['Січень','Лютий','Березень','Квітень','Травень','Червень','Липень','Серпень','Вересень','Жовтень','Листопад','Грудень'];
+    var monthsEn = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+    var months = currentLang === 'en' ? monthsEn : monthsUa;
+    var weekdaysUa = ['Пн','Вт','Ср','Чт','Пт','Сб','Нд'];
+    var weekdaysEn = ['Mo','Tu','We','Th','Fr','Sa','Su'];
+    var weekdays = currentLang === 'en' ? weekdaysEn : weekdaysUa;
+
+    document.getElementById('calTitle').textContent = months[calMonth] + ' ' + calYear;
+
+    var wdHtml = '';
+    for (var w = 0; w < 7; w++) wdHtml += '<div class="cal-weekday">' + weekdays[w] + '</div>';
+    document.getElementById('calWeekdays').innerHTML = wdHtml;
+
+    var firstDay = new Date(calYear, calMonth, 1).getDay();
+    firstDay = (firstDay + 6) % 7;
+    var daysInMonth = new Date(calYear, calMonth + 1, 0).getDate();
+    var todayStr = dateToStr(new Date());
+
+    var entryVal = document.getElementById('entryDate').value;
+    var maxDate = null;
+    if (entryVal) {
+      var ed = strToDate(entryVal);
+      ed.setDate(ed.getDate() - 1);
+      maxDate = dateToStr(ed);
+    }
+
+    var html = '';
+    for (var i = 0; i < firstDay; i++) html += '<div class="cal-day empty"><div class="cal-day-inner"></div></div>';
+    for (var d = 1; d <= daysInMonth; d++) {
+      var m2 = calMonth + 1;
+      var ds = calYear + '-' + (m2 < 10 ? '0' + m2 : m2) + '-' + (d < 10 ? '0' + d : d);
+      var colIndex = (firstDay + d - 1) % 7;
+      var cls = 'cal-day';
+      if (colIndex === 0) cls += ' first-col';
+      if (colIndex === 6) cls += ' last-col';
+      if (maxDate && ds > maxDate) { cls += ' disabled'; }
+      else {
+        if (ds === calStart && ds === calEnd) cls += ' start end';
+        else if (ds === calStart) cls += ' start' + (calEnd ? ' in-range' : '');
+        else if (ds === calEnd) cls += ' end in-range';
+        else if (calStart && calEnd && ds > calStart && ds < calEnd) cls += ' in-range';
+        if (ds === todayStr) cls += ' today';
+      }
+      html += '<div class="' + cls + '" onclick="calSelectDay(\'' + ds + '\')"><div class="cal-day-inner">' + d + '</div></div>';
+    }
+    // Завжди 42 клітинки (6 рядків × 7) — фіксована висота
+    var totalCells = firstDay + daysInMonth;
+    for (var e = totalCells; e < 42; e++) html += '<div class="cal-day empty"><div class="cal-day-inner"></div></div>';
+    document.getElementById('calDays').innerHTML = html;
+
+    var hint = '';
+    var hintHasRange = false;
+    if (!calStart) hint = currentLang === 'en' ? 'Select entry date' : 'Оберіть дату вʼїзду';
+    else if (!calEnd) hint = currentLang === 'en' ? 'Now select exit date' : 'Тепер оберіть дату виїзду';
+    else {
+      var days = Math.round((strToDate(calEnd) - strToDate(calStart)) / 86400000) + 1;
+      hint = days + ' ' + pluralDays(days);
+      hintHasRange = true;
+    }
+    var hintEl = document.getElementById('calHint');
+    hintEl.textContent = hint;
+    hintEl.className = 'cal-hint' + (hintHasRange ? ' has-range' : '');
+
+    var saveBtn = document.getElementById('calSaveBtn');
+    var cancelBtn = document.getElementById('calCancelBtn');
+    saveBtn.textContent = currentLang === 'en' ? 'SAVE' : 'ЗБЕРЕГТИ';
+    cancelBtn.textContent = currentLang === 'en' ? 'CANCEL' : 'СКАСУВАТИ';
+    saveBtn.disabled = !calStart || !calEnd;
+    if (!calStart || !calEnd) saveBtn.classList.remove('ready');
+    else saveBtn.classList.add('ready');
+  }
+
+  function updatePeriodDisplay(id) {
+    var item = document.getElementById('period-' + id);
+    if (!item) return;
+    var s = item.getAttribute('data-start');
+    var e = item.getAttribute('data-end');
+    var rangeEl = item.querySelector('.period-item-range');
+    var daysEl = item.querySelector('.period-item-days');
+    if (s && e) {
+      rangeEl.textContent = formatDateShort(s) + ' — ' + formatDateShort(e);
+      var days = Math.round((strToDate(e) - strToDate(s)) / 86400000) + 1;
+      daysEl.textContent = days + ' ' + pluralDays(days);
+      daysEl.classList.remove('hidden');
+    } else {
+      rangeEl.textContent = currentLang === 'en' ? 'Tap to select dates' : 'Натисніть щоб вибрати дати';
+      daysEl.classList.add('hidden');
+    }
+  }
+
   function savePeriods() {
     var items = document.querySelectorAll('.period-item');
     var data = [];
     for (var i = 0; i < items.length; i++) {
       var pid = items[i].id.replace('period-', '');
-      var s = document.getElementById('start-' + pid).value;
-      var e = document.getElementById('end-' + pid).value;
-      data.push({ id: pid, start: s, end: e });
+      data.push({
+        id: pid,
+        start: items[i].getAttribute('data-start') || '',
+        end: items[i].getAttribute('data-end') || ''
+      });
     }
     try { localStorage.setItem('schengen_periods', JSON.stringify(data)); } catch(ex) {}
   }
@@ -1470,79 +1659,27 @@
     var item = document.createElement('div');
     item.className = 'period-item';
     item.id = 'period-' + id;
+    if (startVal) item.setAttribute('data-start', startVal);
+    if (endVal) item.setAttribute('data-end', endVal);
     item.innerHTML =
-      '<div class="period-item-header">' +
+      '<div class="period-item-left">' +
         '<div class="period-item-title">' + t('period') + ' ' + id + '</div>' +
-        '<button type="button" class="period-remove" onclick="removePeriod(' + id + ')">x</button>' +
+        '<div class="period-item-range"></div>' +
+        '<div class="period-item-days hidden"></div>' +
       '</div>' +
-      '<div class="period-item-dates">' +
-        '<div class="period-date-group">' +
-          '<div class="period-date-label period-date-label-entry">' + t('entry') + '</div>' +
-          '<div class="period-date-input" id="start-wrap-' + id + '">' +
-            '<span class="period-date-display" id="start-display-' + id + '">—</span>' +
-            '<svg class="period-date-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>' +
-            '<input type="date" id="start-' + id + '">' +
-          '</div>' +
-        '</div>' +
-        '<div class="period-arrow">—</div>' +
-        '<div class="period-date-group">' +
-          '<div class="period-date-label period-date-label-exit">' + t('exit') + '</div>' +
-          '<div class="period-date-input" id="end-wrap-' + id + '">' +
-            '<span class="period-date-display" id="end-display-' + id + '">—</span>' +
-            '<svg class="period-date-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>' +
-            '<input type="date" id="end-' + id + '">' +
-          '</div>' +
-        '</div>' +
-      '</div>';
+      '<button type="button" class="period-remove">&#x2715;</button>';
     list.prepend(item);
 
-    var startEl = document.getElementById('start-' + id);
-    var endEl = document.getElementById('end-' + id);
-    var startDisplay = document.getElementById('start-display-' + id);
-    var endDisplay = document.getElementById('end-display-' + id);
-
-    function updateDisplays() {
-      startDisplay.textContent = startEl.value ? formatDateShort(startEl.value) : '—';
-      endDisplay.textContent = endEl.value ? formatDateShort(endEl.value) : '—';
-    }
-
-    // Встановлюємо збережені значення
-    if (startVal) startEl.value = startVal;
-    if (endVal) endEl.value = endVal;
-    if (startVal) endEl.min = startVal;
-    updateDisplays();
-
-    startEl.addEventListener('change', function() {
-      if (this.value) {
-        endEl.min = this.value;
-        if (endEl.value && endEl.value < this.value) {
-          endEl.value = '';
-        }
-        if (!endEl.value) {
-          endEl.dataset.defaultDate = this.value;
-        }
-      }
-      updateDisplays();
-      savePeriods();
+    item.querySelector('.period-item-left').addEventListener('click', function() {
+      var el = document.getElementById('period-' + id);
+      openCalendar(id, el.getAttribute('data-start'), el.getAttribute('data-end'));
+    });
+    item.querySelector('.period-remove').addEventListener('click', function(e) {
+      e.stopPropagation();
+      removePeriod(id);
     });
 
-    endEl.addEventListener('focus', function() {
-      if (!this.value && this.dataset.defaultDate) {
-        this.value = this.dataset.defaultDate;
-      }
-    });
-
-    endEl.addEventListener('blur', function() {
-      if (this.value === this.dataset.defaultDate) {
-        this.value = '';
-      }
-      updateDisplays();
-    });
-
-    endEl.addEventListener('change', function() {
-      updateDisplays();
-      savePeriods();
-    });
+    updatePeriodDisplay(id);
   }
 
   function renumberPeriods() {
@@ -1565,6 +1702,8 @@
     savePeriods();
     updateResetBtn();
     renumberPeriods();
+    // Одразу відкриваємо календар для нового periodу
+    openCalendar(periodCount, null, null);
   }
 
   function removePeriod(id) {
@@ -1636,15 +1775,14 @@
     var periods = [];
     var items = document.querySelectorAll('.period-item');
     for (var i = 0; i < items.length; i++) {
-      var pid = items[i].id.replace('period-', '');
-      var sEl = document.getElementById('start-' + pid);
-      var eEl = document.getElementById('end-' + pid);
-      if (!sEl.value || !eEl.value) {
+      var sVal = items[i].getAttribute('data-start');
+      var eVal = items[i].getAttribute('data-end');
+      if (!sVal || !eVal) {
         showError(t('errEmptyPeriod'));
         return;
       }
-      var s = parseDate(sEl.value);
-      var e = parseDate(eEl.value);
+      var s = parseDate(sVal);
+      var e = parseDate(eVal);
       if (s > e) {
         showError(t('errDateOrder'));
         return;
