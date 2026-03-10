@@ -7,7 +7,7 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<title>Шенген Калькулятор</title>
+<title>Шенген Калькулятор 90/180</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=IBM+Plex+Mono:wght@300;400;500&family=IBM+Plex+Sans:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
@@ -276,16 +276,17 @@
 
   /* CALENDAR */
   .cal-overlay {
-    position: absolute;
-    left: 0; right: 0;
-    background: rgba(0,0,0,0.7);
-    backdrop-filter: blur(3px);
-    -webkit-backdrop-filter: blur(3px);
+    position: fixed;
+    left: 0; right: 0; top: 0;
+    background: rgba(0,0,0,0.75);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
     z-index: 200;
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 20px;
+    padding: 16px;
+    box-sizing: border-box;
   }
 
   .cal-sheet {
@@ -293,22 +294,22 @@
     border: 1px solid var(--border);
     border-radius: 16px;
     width: 100%;
-    max-width: 360px;
+    max-width: 340px;
     padding: 14px 0 16px;
-    animation: fadeScaleIn 0.2s ease;
+    box-sizing: border-box;
   }
 
   @keyframes fadeScaleIn {
     from { opacity: 0; transform: scale(0.95); }
-    to { opacity: 1; transform: scale(1); }
+    to   { opacity: 1; transform: scale(1); }
   }
 
   .cal-header {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    margin-bottom: 8px;
     padding: 0 14px;
+    margin-bottom: 10px;
   }
 
   .cal-title {
@@ -316,25 +317,19 @@
     font-size: 18px;
     letter-spacing: 2px;
     color: var(--accent);
+    text-transform: uppercase;
   }
 
-  .cal-nav {
-    display: flex;
-    gap: 6px;
-  }
+  .cal-nav { display: flex; gap: 6px; }
 
   .cal-nav-btn {
     background: var(--surface2);
     border: 1px solid var(--border);
     border-radius: 6px;
     color: var(--text);
-    width: 28px;
-    height: 28px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    font-size: 15px;
+    width: 28px; height: 28px;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; font-size: 15px;
     -webkit-appearance: none;
   }
 
@@ -354,66 +349,52 @@
     text-transform: uppercase;
   }
 
-  /* Фіксована сітка: завжди 6 рядків по 7 комірок */
-  .cal-days {
-    display: grid;
-    grid-template-columns: repeat(7, 1fr);
-    grid-template-rows: repeat(6, 1fr);
-    height: 174px;
+  /* Рядки — кожен рядок тижня як окремий flex-рядок */
+  .cal-week {
+    display: flex;
+    position: relative;
+    height: 36px;
+  }
+
+  /* Полоса діапазону на весь рядок */
+  .cal-week-range {
+    position: absolute;
+    top: 4px; bottom: 4px;
+    background: rgba(0, 200, 255, 0.15);
+    border-radius: 0;
+    z-index: 0;
+    pointer-events: none;
+  }
+
+  .cal-days-wrap {
+    padding: 0 8px;
   }
 
   .cal-day {
-    height: 29px;
+    flex: 1;
+    height: 36px;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-family: var(--font-mono);
-    font-size: 12px;
-    color: var(--text);
-    cursor: pointer;
     position: relative;
+    z-index: 1;
+    cursor: pointer;
     -webkit-tap-highlight-color: transparent;
     user-select: none;
   }
 
   .cal-day-inner {
-    width: 26px;
-    height: 26px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    width: 28px; height: 28px;
+    display: flex; align-items: center; justify-content: center;
     border-radius: 50%;
-    position: relative;
-    z-index: 1;
-    flex-shrink: 0;
+    font-family: var(--font-mono);
+    font-size: 13px;
+    color: var(--text);
   }
 
   .cal-day.empty { pointer-events: none; }
-  .cal-day.disabled { color: rgba(90,138,170,0.25); pointer-events: none; }
+  .cal-day.disabled .cal-day-inner { color: rgba(90,138,170,0.25); }
   .cal-day.today .cal-day-inner { color: var(--accent); font-weight: 600; }
-
-  /* Фон полоси — окремий елемент всередині .cal-day */
-  .cal-day-bg {
-    position: absolute;
-    top: 3px; bottom: 3px;
-    left: 0; right: 0;
-    background: rgba(0,200,255,0.18);
-    z-index: 0;
-    pointer-events: none;
-  }
-
-  /* Старт: полоса від центру вправо */
-  .cal-day.start .cal-day-bg { left: 50%; border-radius: 0; }
-  /* Кінець: полоса від лівого краю до центру */
-  .cal-day.end   .cal-day-bg { right: 50%; border-radius: 0; }
-  /* Один день */
-  .cal-day.start.end .cal-day-bg { display: none; }
-  /* Перший стовпець — закруглений лівий край */
-  .cal-day.first-col .cal-day-bg { border-radius: 13px 0 0 13px; }
-  /* Останній стовпець — закруглений правий край */
-  .cal-day.last-col  .cal-day-bg { border-radius: 0 13px 13px 0; }
-
-  /* Акцентне коло для старт/кінець */
   .cal-day.start .cal-day-inner,
   .cal-day.end   .cal-day-inner {
     background: var(--accent);
@@ -427,24 +408,18 @@
     font-family: var(--font-mono);
     color: var(--muted);
     height: 28px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    display: flex; align-items: center; justify-content: center;
     letter-spacing: 0.5px;
   }
-
   .cal-hint.has-range { color: var(--accent); }
 
   .cal-actions {
-    display: flex;
-    gap: 8px;
+    display: flex; gap: 8px;
     padding: 0 14px;
-    justify-content: center;
   }
 
   .cal-cancel, .cal-save {
-    flex: 1;
-    padding: 11px;
+    flex: 1; padding: 11px;
     border-radius: 10px;
     font-family: var(--font-mono);
     font-size: 12px;
@@ -453,25 +428,326 @@
     -webkit-appearance: none;
     text-align: center;
   }
-
   .cal-cancel {
     background: transparent;
     border: 1px solid var(--border);
     color: var(--muted);
   }
-
   .cal-save {
     background: linear-gradient(135deg, var(--accent2), var(--accent));
-    border: none;
-    color: var(--bg);
-    font-weight: 600;
-    opacity: 0.35;
-    transition: opacity 0.2s;
+    border: none; color: var(--bg); font-weight: 600;
+    opacity: 0.35; transition: opacity 0.2s;
   }
-
   .cal-save.ready { opacity: 1; }
 
-  .add-period-btn {
+/* PERIOD ITEM NEW STYLE */
+  .period-range-display {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    cursor: pointer;
+  }
+
+  .period-range-date {
+    font-family: var(--font-mono);
+    font-size: 13px;
+    color: var(--text);
+  }
+
+  .period-range-arrow {
+    color: var(--muted);
+    font-size: 14px;
+  }
+
+  .period-range-days {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--accent);
+    background: rgba(0,200,255,0.1);
+    border: 1px solid rgba(0,200,255,0.2);
+    border-radius: 4px;
+    padding: 2px 6px;
+    margin-left: auto;
+  }
+
+  .period-empty-hint {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--muted);
+    font-style: italic;
+  }
+
+  /* POPUP */
+  .popup-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.4);
+    backdrop-filter: blur(1px);
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+  }
+
+  .popup {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    max-width: 400px;
+    width: 100%;
+    overflow: hidden;
+  }
+
+  .popup-header {
+    background: linear-gradient(135deg, var(--accent2), var(--accent));
+    padding: 12px 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+  }
+
+  .popup-header h2 {
+    font-family: var(--font-display);
+    font-size: 20px;
+    letter-spacing: 2px;
+    color: var(--bg);
+    line-height: 1;
+    white-space: nowrap;
+    flex: 1;
+    text-align: center;
+  }
+
+  .popup-body {
+    padding: 18px 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .popup-step {
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+  }
+
+  .popup-step-num {
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: rgba(0,200,255,0.15);
+    border: 1px solid rgba(0,200,255,0.3);
+    color: var(--accent);
+    font-family: var(--font-mono);
+    font-size: 11px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+
+  .popup-step-text {
+    font-family: var(--font-body);
+    font-size: 13px;
+    color: var(--text);
+    line-height: 1.5;
+  }
+
+  .popup-step-text strong {
+    color: var(--accent);
+    font-weight: 500;
+  }
+
+  .popup-divider {
+    height: 1px;
+    background: var(--border);
+    margin: 2px 0;
+  }
+
+  .popup-note {
+    font-family: var(--font-mono);
+    font-size: 13px;
+    color: var(--muted);
+    line-height: 1.6;
+    padding: 10px 12px;
+    background: rgba(0,200,255,0.04);
+    border: 1px solid rgba(0,200,255,0.1);
+    border-radius: 8px;
+  }
+
+  .popup-btn {
+    width: 100%;
+    padding: 14px;
+    background: linear-gradient(135deg, var(--accent2), var(--accent));
+    border: none;
+    border-radius: 10px;
+    color: var(--bg);
+    font-family: var(--font-display);
+    font-size: 20px;
+    letter-spacing: 2px;
+    cursor: pointer;
+    margin-top: 4px;
+    -webkit-appearance: none;
+  }
+
+/* PERIOD ITEM NEW STYLE */
+  .period-range-display {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    cursor: pointer;
+  }
+
+  .period-range-date {
+    font-family: var(--font-mono);
+    font-size: 13px;
+    color: var(--text);
+  }
+
+  .period-range-arrow {
+    color: var(--muted);
+    font-size: 14px;
+  }
+
+  .period-range-days {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--accent);
+    background: rgba(0,200,255,0.1);
+    border: 1px solid rgba(0,200,255,0.2);
+    border-radius: 4px;
+    padding: 2px 6px;
+    margin-left: auto;
+  }
+
+  .period-empty-hint {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--muted);
+    font-style: italic;
+  }
+
+  /* POPUP */
+  .popup-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.4);
+    backdrop-filter: blur(1px);
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+  }
+
+  .popup {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    max-width: 400px;
+    width: 100%;
+    overflow: hidden;
+  }
+
+  .popup-header {
+    background: linear-gradient(135deg, var(--accent2), var(--accent));
+    padding: 12px 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+  }
+
+  .popup-header h2 {
+    font-family: var(--font-display);
+    font-size: 20px;
+    letter-spacing: 2px;
+    color: var(--bg);
+    line-height: 1;
+    white-space: nowrap;
+    flex: 1;
+    text-align: center;
+  }
+
+  .popup-body {
+    padding: 18px 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .popup-step {
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+  }
+
+  .popup-step-num {
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: rgba(0,200,255,0.15);
+    border: 1px solid rgba(0,200,255,0.3);
+    color: var(--accent);
+    font-family: var(--font-mono);
+    font-size: 11px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+
+  .popup-step-text {
+    font-family: var(--font-body);
+    font-size: 13px;
+    color: var(--text);
+    line-height: 1.5;
+  }
+
+  .popup-step-text strong {
+    color: var(--accent);
+    font-weight: 500;
+  }
+
+  .popup-divider {
+    height: 1px;
+    background: var(--border);
+    margin: 2px 0;
+  }
+
+  .popup-note {
+    font-family: var(--font-mono);
+    font-size: 13px;
+    color: var(--muted);
+    line-height: 1.6;
+    padding: 10px 12px;
+    background: rgba(0,200,255,0.04);
+    border: 1px solid rgba(0,200,255,0.1);
+    border-radius: 8px;
+  }
+
+  .popup-btn {
+    width: 100%;
+    padding: 14px;
+    background: linear-gradient(135deg, var(--accent2), var(--accent));
+    border: none;
+    border-radius: 10px;
+    color: var(--bg);
+    font-family: var(--font-display);
+    font-size: 20px;
+    letter-spacing: 2px;
+    cursor: pointer;
+    margin-top: 4px;
+    -webkit-appearance: none;
+  }
+
+
+.add-period-btn {
     width: 100%;
     background: transparent;
     border: 1px dashed var(--border);
@@ -633,441 +909,6 @@
     line-height: 1.6;
   }
 
-  /* RANGE CALENDAR */
-  .cal-overlay {
-    position: fixed;
-    inset: 0;
-    background: rgba(0,0,0,0.6);
-    backdrop-filter: blur(3px);
-    z-index: 200;
-    display: flex;
-    align-items: flex-end;
-    justify-content: center;
-  }
-
-  .cal-sheet {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 20px 20px 0 0;
-    width: 100%;
-    max-width: 440px;
-    padding: 16px 16px 32px;
-  }
-
-  .cal-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 14px;
-  }
-
-  .cal-title {
-    font-family: var(--font-mono);
-    font-size: 13px;
-    color: var(--accent);
-    letter-spacing: 1px;
-    text-transform: uppercase;
-  }
-
-  .cal-nav {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-  }
-
-  .cal-nav-btn {
-    background: var(--surface2);
-    border: 1px solid var(--border);
-    border-radius: 6px;
-    color: var(--text);
-    width: 30px;
-    height: 30px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    font-size: 14px;
-    -webkit-appearance: none;
-  }
-
-  .cal-month-label {
-    font-family: var(--font-mono);
-    font-size: 13px;
-    color: var(--text);
-    min-width: 120px;
-    text-align: center;
-  }
-
-  .cal-grid {
-    display: grid;
-    grid-template-columns: repeat(7, 1fr);
-    gap: 2px;
-  }
-
-  .cal-dow {
-    font-family: var(--font-mono);
-    font-size: 10px;
-    color: var(--muted);
-    text-align: center;
-    padding: 4px 0 8px;
-    text-transform: uppercase;
-  }
-
-  .cal-day {
-    aspect-ratio: 1;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-family: var(--font-mono);
-    font-size: 13px;
-    color: var(--text);
-    border-radius: 6px;
-    cursor: pointer;
-    position: relative;
-    -webkit-appearance: none;
-    background: transparent;
-    border: none;
-  }
-
-  .cal-day:disabled { color: var(--muted); opacity: 0.35; cursor: default; }
-  .cal-day.empty { cursor: default; }
-  .cal-day.today { color: var(--accent); }
-
-  .cal-day.start, .cal-day.end {
-    background: var(--accent);
-    color: var(--bg);
-    font-weight: 600;
-    border-radius: 6px;
-    z-index: 1;
-  }
-
-  .cal-day.in-range {
-    background: rgba(0,200,255,0.15);
-    border-radius: 0;
-    color: var(--text);
-  }
-
-  .cal-day.start.in-range { border-radius: 6px 0 0 6px; }
-  .cal-day.end.in-range { border-radius: 0 6px 6px 0; }
-  .cal-day.start.end { border-radius: 6px; }
-
-  .cal-hint {
-    font-family: var(--font-mono);
-    font-size: 11px;
-    color: var(--muted);
-    text-align: center;
-    margin: 10px 0 14px;
-    min-height: 16px;
-  }
-
-  .cal-actions {
-    display: flex;
-    gap: 8px;
-    margin-top: 14px;
-  }
-
-  .cal-cancel-btn {
-    flex: 1;
-    padding: 13px;
-    background: transparent;
-    border: 1px solid var(--border);
-    border-radius: 10px;
-    color: var(--muted);
-    font-family: var(--font-mono);
-    font-size: 12px;
-    letter-spacing: 1px;
-    cursor: pointer;
-    -webkit-appearance: none;
-  }
-
-  .cal-save-btn {
-    flex: 2;
-    padding: 13px;
-    background: linear-gradient(135deg, var(--accent2), var(--accent));
-    border: none;
-    border-radius: 10px;
-    color: var(--bg);
-    font-family: var(--font-display);
-    font-size: 18px;
-    letter-spacing: 2px;
-    cursor: pointer;
-    -webkit-appearance: none;
-  }
-
-  .cal-save-btn:disabled {
-    opacity: 0.4;
-    cursor: default;
-  }
-
-  /* Period item new style */
-  .period-range {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    flex-wrap: wrap;
-  }
-
-  .period-range-dates {
-    font-family: var(--font-mono);
-    font-size: 13px;
-    color: var(--text);
-    flex: 1;
-  }
-
-  .period-range-days {
-    font-family: var(--font-mono);
-    font-size: 11px;
-    color: var(--accent);
-    background: rgba(0,200,255,0.1);
-    border: 1px solid rgba(0,200,255,0.2);
-    border-radius: 20px;
-    padding: 2px 10px;
-    white-space: nowrap;
-  }
-
-  .period-edit-btn {
-    background: var(--surface2);
-    border: 1px solid var(--border);
-    border-radius: 6px;
-    color: var(--muted);
-    font-family: var(--font-mono);
-    font-size: 10px;
-    padding: 4px 8px;
-    cursor: pointer;
-    -webkit-appearance: none;
-    letter-spacing: 1px;
-    white-space: nowrap;
-  }
-
-  /* RANGE CALENDAR */
-  .cal-overlay {
-    position: fixed;
-    inset: 0;
-    background: rgba(0,0,0,0.6);
-    backdrop-filter: blur(3px);
-    z-index: 200;
-    display: flex;
-    align-items: flex-end;
-    justify-content: center;
-  }
-
-  .cal-sheet {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 20px 20px 0 0;
-    width: 100%;
-    max-width: 440px;
-    padding: 0 0 32px;
-    animation: slideUp 0.25s ease;
-  }
-
-  @keyframes slideUp {
-    from { transform: translateY(100%); }
-    to { transform: translateY(0); }
-  }
-
-  .cal-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 16px 20px 8px;
-    border-bottom: 1px solid var(--border);
-  }
-
-  .cal-title {
-    font-family: var(--font-mono);
-    font-size: 11px;
-    color: var(--muted);
-    letter-spacing: 2px;
-    text-transform: uppercase;
-  }
-
-  .cal-hint {
-    font-family: var(--font-mono);
-    font-size: 11px;
-    color: var(--accent);
-    letter-spacing: 1px;
-  }
-
-  .cal-close {
-    background: rgba(255,59,92,0.1);
-    border: 1px solid rgba(255,59,92,0.25);
-    color: var(--red);
-    border-radius: 6px;
-    width: 28px;
-    height: 28px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 16px;
-    cursor: pointer;
-    -webkit-appearance: none;
-    flex-shrink: 0;
-  }
-
-  .cal-nav {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 12px 20px 8px;
-  }
-
-  .cal-nav-btn {
-    background: transparent;
-    border: 1px solid var(--border);
-    border-radius: 6px;
-    color: var(--text);
-    width: 32px;
-    height: 32px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    -webkit-appearance: none;
-    font-size: 16px;
-  }
-
-  .cal-month-label {
-    font-family: var(--font-display);
-    font-size: 20px;
-    letter-spacing: 2px;
-    color: var(--text);
-  }
-
-  .cal-weekdays {
-    display: grid;
-    grid-template-columns: repeat(7, 1fr);
-    padding: 0 12px;
-    margin-bottom: 4px;
-  }
-
-  .cal-weekday {
-    text-align: center;
-    font-family: var(--font-mono);
-    font-size: 10px;
-    color: var(--muted);
-    padding: 4px 0;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-  }
-
-  .cal-days {
-    display: grid;
-    grid-template-columns: repeat(7, 1fr);
-    padding: 0 12px;
-    gap: 2px 0;
-  }
-
-  .cal-day {
-    aspect-ratio: 1;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-family: var(--font-mono);
-    font-size: 13px;
-    color: var(--text);
-    cursor: pointer;
-    border-radius: 50%;
-    position: relative;
-    -webkit-tap-highlight-color: transparent;
-    user-select: none;
-  }
-
-  .cal-day.empty { pointer-events: none; }
-  .cal-day.other-month { color: var(--muted); opacity: 0.4; }
-  .cal-day.today { color: var(--accent); font-weight: 500; }
-
-  .cal-day.start, .cal-day.end {
-    background: var(--accent);
-    color: var(--bg);
-    border-radius: 50%;
-    z-index: 1;
-  }
-
-  .cal-day.in-range {
-    background: rgba(0,200,255,0.15);
-    border-radius: 0;
-    color: var(--text);
-  }
-
-  .cal-day.start { border-radius: 50% 0 0 50%; }
-  .cal-day.end { border-radius: 0 50% 50% 0; }
-  .cal-day.start.end { border-radius: 50%; }
-
-  .cal-day.start::after, .cal-day.end::after {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background: var(--accent);
-    border-radius: 50%;
-    z-index: -1;
-  }
-
-  .cal-day.disabled {
-    opacity: 0.25;
-    pointer-events: none;
-  }
-
-  .cal-save-btn {
-    margin: 14px 20px 0;
-    width: calc(100% - 40px);
-    padding: 14px;
-    background: linear-gradient(135deg, var(--accent2), var(--accent));
-    border: none;
-    border-radius: 10px;
-    color: var(--bg);
-    font-family: var(--font-display);
-    font-size: 20px;
-    letter-spacing: 2px;
-    cursor: pointer;
-    -webkit-appearance: none;
-    display: block;
-  }
-
-  .cal-save-btn:disabled {
-    opacity: 0.35;
-    pointer-events: none;
-  }
-
-  /* PERIOD ITEM NEW STYLE */
-  .period-range-display {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    flex-wrap: wrap;
-    cursor: pointer;
-  }
-
-  .period-range-date {
-    font-family: var(--font-mono);
-    font-size: 13px;
-    color: var(--text);
-  }
-
-  .period-range-arrow {
-    color: var(--muted);
-    font-size: 14px;
-  }
-
-  .period-range-days {
-    font-family: var(--font-mono);
-    font-size: 11px;
-    color: var(--accent);
-    background: rgba(0,200,255,0.1);
-    border: 1px solid rgba(0,200,255,0.2);
-    border-radius: 4px;
-    padding: 2px 6px;
-    margin-left: auto;
-  }
-
-  .period-empty-hint {
-    font-family: var(--font-mono);
-    font-size: 12px;
-    color: var(--muted);
-    font-style: italic;
-  }
-
-  /* POPUP */
   .popup-overlay {
     position: fixed;
     inset: 0;
@@ -1311,7 +1152,7 @@
       </div>
     </div>
     <div class="cal-weekdays" id="calWeekdays"></div>
-    <div class="cal-days" id="calDays"></div>
+    <div class="cal-days-wrap" id="calDaysWrap"></div>
     <div class="cal-hint" id="calHint"></div>
     <div class="cal-actions">
       <button type="button" class="cal-cancel" onclick="calCancel()" id="calCancelBtn"></button>
@@ -1479,10 +1320,7 @@
     calMonth = now.getMonth();
     renderCalendar();
     var overlay = document.getElementById('calOverlay');
-    var scrollY = window.scrollY || window.pageYOffset;
-    var h = window.innerHeight;
-    overlay.style.top = scrollY + 'px';
-    overlay.style.height = h + 'px';
+    overlay.style.height = window.innerHeight + 'px';
     overlay.classList.remove('hidden');
     document.body.style.overflow = 'hidden';
   }
@@ -1551,7 +1389,7 @@
     document.getElementById('calWeekdays').innerHTML = wdHtml;
 
     var firstDay = new Date(calYear, calMonth, 1).getDay();
-    firstDay = (firstDay + 6) % 7;
+    firstDay = (firstDay + 6) % 7; // Пн=0
     var daysInMonth = new Date(calYear, calMonth + 1, 0).getDate();
     var todayStr = dateToStr(new Date());
 
@@ -1563,34 +1401,84 @@
       maxDate = dateToStr(ed);
     }
 
-    var html = '';
-    for (var i = 0; i < firstDay; i++) html += '<div class="cal-day empty"><div class="cal-day-inner"></div></div>';
+    // Будуємо масив 42 клітинок
+    var cells = [];
+    for (var i = 0; i < firstDay; i++) cells.push(null);
     for (var d = 1; d <= daysInMonth; d++) {
       var m2 = calMonth + 1;
-      var ds = calYear + '-' + (m2 < 10 ? '0' + m2 : m2) + '-' + (d < 10 ? '0' + d : d);
-      var colIndex = (firstDay + d - 1) % 7;
-      var cls = 'cal-day';
-      if (colIndex === 0) cls += ' first-col';
-      if (colIndex === 6) cls += ' last-col';
-      if (maxDate && ds > maxDate) { cls += ' disabled'; }
-      else {
-        if (ds === calStart && ds === calEnd) cls += ' start end';
-        else if (ds === calStart) cls += ' start' + (calEnd ? ' in-range' : '');
-        else if (ds === calEnd) cls += ' end in-range';
-        else if (calStart && calEnd && ds > calStart && ds < calEnd) cls += ' in-range';
-        if (ds === todayStr) cls += ' today';
-      }
-      var hasBg = cls.indexOf('in-range') >= 0 || cls.indexOf('start') >= 0 || cls.indexOf('end') >= 0;
-      var bgDiv = hasBg ? '<div class="cal-day-bg"></div>' : '';
-      html += '<div class="' + cls + '" onclick="calSelectDay(\'' + ds + '\')">' + bgDiv + '<div class="cal-day-inner">' + d + '</div></div>';
+      cells.push(calYear + '-' + (m2 < 10 ? '0' + m2 : m2) + '-' + (d < 10 ? '0' + d : d));
     }
-    // Завжди 42 клітинки (6 рядків × 7) — фіксована висота
-    var totalCells = firstDay + daysInMonth;
-    for (var e = totalCells; e < 42; e++) html += '<div class="cal-day empty"><div class="cal-day-inner"></div></div>';
-    document.getElementById('calDays').innerHTML = html;
+    while (cells.length < 42) cells.push(null);
 
-    var hint = '';
-    var hintHasRange = false;
+    // Рендеримо 6 рядків-тижнів
+    var html = '';
+    for (var row = 0; row < 6; row++) {
+      var rowCells = cells.slice(row * 7, row * 7 + 7);
+
+      // Знайдемо перший і останній день діапазону в цьому рядку
+      var rangeStart = -1; var rangeEnd = -1;
+      for (var col = 0; col < 7; col++) {
+        var ds = rowCells[col];
+        if (!ds) continue;
+        var inRange = calStart && calEnd && ds >= calStart && ds <= calEnd;
+        var isStart = ds === calStart;
+        var isEnd = ds === calEnd;
+        if (inRange || isStart || isEnd) {
+          if (rangeStart < 0) rangeStart = col;
+          rangeEnd = col;
+        }
+      }
+
+      // Обчислюємо позицію полоси (у % від ширини рядка)
+      var stripHtml = '';
+      if (rangeStart >= 0) {
+        var colW = 100 / 7;
+        // Лівий край: центр першої клітинки діапазону (якщо це start) або лівий край
+        var leftDs = rowCells[rangeStart];
+        var rightDs = rowCells[rangeEnd];
+        var leftIsStart = leftDs === calStart;
+        var rightIsEnd = rightDs === calEnd;
+
+        var leftPct = leftIsStart
+          ? (rangeStart * colW + colW / 2)   // від центру стартової клітинки
+          : (rangeStart * colW);              // від лівого краю
+        var rightPct = rightIsEnd
+          ? ((rangeEnd + 1) * colW - colW / 2) // до центру кінцевої клітинки
+          : ((rangeEnd + 1) * colW);            // до правого краю
+
+        // Заокруглення
+        var br = '';
+        if (leftIsStart && rightIsEnd) br = 'border-radius:14px;';
+        else if (leftIsStart) br = 'border-radius:14px 0 0 14px;';
+        else if (rightIsEnd) br = 'border-radius:0 14px 14px 0;';
+
+        stripHtml = '<div class="cal-week-range" style="left:' + leftPct.toFixed(2) + '%;width:' + (rightPct - leftPct).toFixed(2) + '%;' + br + '"></div>';
+      }
+
+      // Рендеримо клітинки
+      var cellsHtml = '';
+      for (var col = 0; col < 7; col++) {
+        var ds = rowCells[col];
+        if (!ds) { cellsHtml += '<div class="cal-day empty"><div class="cal-day-inner"></div></div>'; continue; }
+        var cls = 'cal-day';
+        var disabled = maxDate && ds > maxDate;
+        if (disabled) cls += ' disabled';
+        else {
+          if (ds === calStart && ds === calEnd) cls += ' start end';
+          else if (ds === calStart) cls += ' start';
+          else if (ds === calEnd) cls += ' end';
+          if (ds === todayStr) cls += ' today';
+        }
+        var dayNum = parseInt(ds.split('-')[2], 10);
+        cellsHtml += '<div class="' + cls + '" onclick="calSelectDay(\'' + ds + '\')"><div class="cal-day-inner">' + dayNum + '</div></div>';
+      }
+
+      html += '<div class="cal-week">' + stripHtml + cellsHtml + '</div>';
+    }
+
+    document.getElementById('calDaysWrap').innerHTML = html;
+
+    var hint = ''; var hintHasRange = false;
     if (!calStart) hint = currentLang === 'en' ? 'Select entry date' : 'Оберіть дату вʼїзду';
     else if (!calEnd) hint = currentLang === 'en' ? 'Now select exit date' : 'Тепер оберіть дату виїзду';
     else {
