@@ -632,8 +632,7 @@
       </div>
       <h2 data-i18n="howToUse">ЯК КОРИСТУВАТИСЬ</h2>
       <div style="display:flex;gap:4px;flex-shrink:0">
-        <button type="button" class="lang-btn active" id="popupBtnUA" onclick="setLang('ua')">UA</button>
-        <button type="button" class="lang-btn" id="popupBtnEN" onclick="setLang('en')">EN</button>
+        <button type="button" class="lang-btn active" id="popupLangBtn" onclick="setLang(currentLang === 'ua' ? 'en' : 'ua')">EN</button>
       </div>
     </div>
     <div class="popup-body">
@@ -684,8 +683,7 @@
       <h1 data-i18n="title">ШЕНГЕН</h1>
     </div>
     <div class="lang-switcher">
-      <button type="button" class="lang-btn active" id="btnUA" onclick="setLang('ua')">UA</button>
-      <button type="button" class="lang-btn" id="btnEN" onclick="setLang('en')">EN</button>
+      <button type="button" class="lang-btn active" id="mainLangBtn" onclick="setLang(currentLang === 'ua' ? 'en' : 'ua')">EN</button>
     </div>
     <div class="subtitle" data-i18n="subtitle">Калькулятор 90/180 днів</div>
   </header>
@@ -815,10 +813,10 @@
     document.querySelectorAll('[data-i18n-html]').forEach(function(el) {
       el.innerHTML = t(el.getAttribute('data-i18n-html'));
     });
-    document.getElementById('btnUA').classList.toggle('active', currentLang === 'ua');
-    document.getElementById('btnEN').classList.toggle('active', currentLang === 'en');
-    document.getElementById('popupBtnUA').classList.toggle('active', currentLang === 'ua');
-    document.getElementById('popupBtnEN').classList.toggle('active', currentLang === 'en');
+    var mainBtn = document.getElementById('mainLangBtn');
+    if (mainBtn) mainBtn.textContent = currentLang === 'ua' ? 'EN' : 'UA';
+    var popupBtn = document.getElementById('popupLangBtn');
+    if (popupBtn) popupBtn.textContent = currentLang === 'ua' ? 'EN' : 'UA';
     // Оновлюємо назви periodів
     renumberPeriods();
     // Оновлюємо підписи Вʼїзд/Виїзд в усіх periodах
