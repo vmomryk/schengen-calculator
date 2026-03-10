@@ -276,8 +276,8 @@
 
   /* CALENDAR */
   .cal-overlay {
-    position: fixed;
-    top: 0; left: 0; right: 0; bottom: 0;
+    position: absolute;
+    left: 0; right: 0;
     background: rgba(0,0,0,0.7);
     backdrop-filter: blur(3px);
     -webkit-backdrop-filter: blur(3px);
@@ -374,7 +374,6 @@
     position: relative;
     -webkit-tap-highlight-color: transparent;
     user-select: none;
-    overflow: visible;
   }
 
   .cal-day-inner {
@@ -393,46 +392,30 @@
   .cal-day.disabled { color: rgba(90,138,170,0.25); pointer-events: none; }
   .cal-day.today .cal-day-inner { color: var(--accent); font-weight: 600; }
 
-  /* Суцільний фон діапазону — від краю до краю клітинки */
-  .cal-day.in-range::before {
-    content: '';
+  /* Фон полоси — окремий елемент всередині .cal-day */
+  .cal-day-bg {
     position: absolute;
-    top: 2px; bottom: 2px;
+    top: 3px; bottom: 3px;
     left: 0; right: 0;
-    background: rgba(0,200,255,0.15);
+    background: rgba(0,200,255,0.18);
     z-index: 0;
+    pointer-events: none;
   }
 
-  /* Старт: коло + фон від центру вправо */
-  .cal-day.start::before {
-    content: '';
-    position: absolute;
-    top: 2px; bottom: 2px;
-    left: 50%; right: 0;
-    background: rgba(0,200,255,0.15);
-    z-index: 0;
-  }
+  /* Старт: полоса від центру вправо */
+  .cal-day.start .cal-day-bg { left: 50%; border-radius: 0; }
+  /* Кінець: полоса від лівого краю до центру */
+  .cal-day.end   .cal-day-bg { right: 50%; border-radius: 0; }
+  /* Один день */
+  .cal-day.start.end .cal-day-bg { display: none; }
+  /* Перший стовпець — закруглений лівий край */
+  .cal-day.first-col .cal-day-bg { border-radius: 13px 0 0 13px; }
+  /* Останній стовпець — закруглений правий край */
+  .cal-day.last-col  .cal-day-bg { border-radius: 0 13px 13px 0; }
 
-  /* Кінець: фон від лівого краю до центру */
-  .cal-day.end::before {
-    content: '';
-    position: absolute;
-    top: 2px; bottom: 2px;
-    left: 0; right: 50%;
-    background: rgba(0,200,255,0.15);
-    z-index: 0;
-  }
-
-  .cal-day.start.end::before { display: none; }
-
-  /* Перший стовпець — округлення зліва */
-  .cal-day.first-col.in-range::before { border-radius: 13px 0 0 13px; }
-  /* Останній стовпець — округлення справа */
-  .cal-day.last-col.in-range::before  { border-radius: 0 13px 13px 0; }
-
-  /* Акцентне коло */
+  /* Акцентне коло для старт/кінець */
   .cal-day.start .cal-day-inner,
-  .cal-day.end .cal-day-inner {
+  .cal-day.end   .cal-day-inner {
     background: var(--accent);
     color: var(--bg);
     font-weight: 600;
@@ -1495,7 +1478,18 @@
     calYear = now.getFullYear();
     calMonth = now.getMonth();
     renderCalendar();
-    document.getElementById('calOverlay').classList.remove('hidden');
+    var overlay = document.getElementById('calOverlay');
+    var scrollY = window.scrollY || window.pageYOffset;
+    var h = window.innerHeight;
+    overlay.style.top = scrollY + 'px';
+    overlay.style.height = h + 'px';
+    overlay.classList.remove('hidden');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeCalendar() {
+    document.getElementById('calOverlay').classList.add('hidden');
+    document.body.style.overflow = '';
   }
 
   function calCancel() {
@@ -1505,7 +1499,7 @@
       var e = item.getAttribute('data-end');
       if (!s || !e) { item.remove(); savePeriods(); updateResetBtn(); renumberPeriods(); }
     }
-    document.getElementById('calOverlay').classList.add('hidden');
+    closeCalendar();
   }
 
   function calSave() {
@@ -1516,7 +1510,7 @@
     item.setAttribute('data-end', calEnd);
     updatePeriodDisplay(calPeriodId);
     savePeriods();
-    document.getElementById('calOverlay').classList.add('hidden');
+    closeCalendar();
   }
 
   function calPrevMonth() {
@@ -1586,7 +1580,9 @@
         else if (calStart && calEnd && ds > calStart && ds < calEnd) cls += ' in-range';
         if (ds === todayStr) cls += ' today';
       }
-      html += '<div class="' + cls + '" onclick="calSelectDay(\'' + ds + '\')"><div class="cal-day-inner">' + d + '</div></div>';
+      var hasBg = cls.indexOf('in-range') >= 0 || cls.indexOf('start') >= 0 || cls.indexOf('end') >= 0;
+      var bgDiv = hasBg ? '<div class="cal-day-bg"></div>' : '';
+      html += '<div class="' + cls + '" onclick="calSelectDay(\'' + ds + '\')">' + bgDiv + '<div class="cal-day-inner">' + d + '</div></div>';
     }
     // Завжди 42 клітинки (6 рядків × 7) — фіксована висота
     var totalCells = firstDay + daysInMonth;
