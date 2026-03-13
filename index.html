@@ -885,9 +885,82 @@
     text-align: center;
   }
 
-  .exit-title { font-family: var(--font-mono); font-size: 12px; color: var(--amber); letter-spacing: 2px; text-transform: uppercase; margin-bottom: 6px; }
+  .exit-title { font-family: var(--font-mono); font-size: 12px; color: var(--amber); letter-spacing: 2px; text-transform: uppercase; margin-bottom: 6px; display: flex; align-items: center; justify-content: center; gap: 6px; }
   .exit-date { font-family: var(--font-display); font-size: 28px; letter-spacing: 2px; color: var(--amber); }
   .exit-note { font-size: 13px; color: var(--muted); font-family: var(--font-mono); margin-top: 4px; line-height: 1.5; }
+
+  .info-icon-btn {
+    width: 16px; height: 16px;
+    border-radius: 50%;
+    border: 1px solid var(--amber);
+    background: transparent;
+    color: var(--amber);
+    font-family: var(--font-mono);
+    font-size: 10px;
+    line-height: 1;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    -webkit-appearance: none;
+    padding: 0;
+  }
+
+  .info-popup-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.6);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    z-index: 300;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+  }
+
+  .info-popup {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    width: 100%;
+    max-width: 360px;
+    padding: 20px;
+    animation: fadeScaleIn 0.2s ease;
+  }
+
+  .info-popup-title {
+    font-family: var(--font-display);
+    font-size: 20px;
+    letter-spacing: 2px;
+    color: var(--amber);
+    margin-bottom: 12px;
+  }
+
+  .info-popup-text {
+    font-size: 13px;
+    color: var(--text);
+    font-family: var(--font-mono);
+    line-height: 1.6;
+    margin-bottom: 16px;
+  }
+
+  .info-popup-text strong { color: var(--accent); }
+
+  .info-popup-btn {
+    width: 100%;
+    padding: 11px;
+    background: linear-gradient(135deg, var(--accent2), var(--accent));
+    border: none;
+    border-radius: 10px;
+    color: var(--bg);
+    font-family: var(--font-display);
+    font-size: 18px;
+    letter-spacing: 2px;
+    cursor: pointer;
+    -webkit-appearance: none;
+  }
 
   .reset-btn {
     display: block;
@@ -1178,6 +1251,15 @@
 
 </div>
 
+<!-- INFO POPUP -->
+<div class="info-popup-overlay hidden" id="infoPopupOverlay">
+  <div class="info-popup">
+    <div class="info-popup-title" data-i18n="infoPopupTitle">ЧОМУ ТАКА ДАТА?</div>
+    <div class="info-popup-text" id="infoPopupText"></div>
+    <button type="button" class="info-popup-btn" onclick="closeInfoPopup()" data-i18n="understood">ЗРОЗУМІЛО</button>
+  </div>
+</div>
+
 <!-- CALENDAR -->
 <div class="cal-overlay hidden" id="calOverlay">
   <div class="cal-sheet">
@@ -1249,6 +1331,9 @@
       daysUsed: 'Днів використано',
       daysLeft: 'Залишилось днів',
       lastExitDay: 'Крайній день виїзду',
+      nextAllowed: 'Наступний дозволений вʼїзд',
+      infoPopupTitle: 'ЧОМУ ТАКА ДАТА?',
+      infoPopupText: 'Правило 90/180 працює як <strong>ковзне вікно</strong> — воно рухається щодня.<br><br>Навіть якщо на момент вʼїзду залишився лише 1 день, вже наступного дня вікно зсувається вперед і з підрахунку випадають найстаріші дні попередніх поїздок — звільняючи місце для нових.<br><br>Саме тому крайня дата виїзду може бути значно пізніше, ніж здається на перший погляд.',
       exitNote: 'Максимальне перебування у цій поїздці: %d %u. Виїдьте не пізніше цієї дати, щоб не порушити правило 90/180.',
       errNoEntry: 'Будь ласка, вкажіть дату запланованого вʼїзду.',
       errEmptyPeriod: 'Заповніть усі дати у всіх періодах або видаліть порожні.',
@@ -1286,6 +1371,9 @@
       daysUsed: 'Days used',
       daysLeft: 'Days remaining',
       lastExitDay: 'Latest Exit Date',
+      nextAllowed: 'Next Allowed Entry',
+      infoPopupTitle: 'WHY THIS DATE?',
+      infoPopupText: 'The 90/180 rule uses a <strong>rolling window</strong> — it shifts forward every day.<br><br>Even if only 1 day remains at entry, the next day the window moves forward and the oldest days from previous trips fall out of the count — freeing up space for new days.<br><br>That\'s why the latest exit date can be much later than it first appears.',
       exitNote: 'Maximum stay on this trip: %d %u. Leave no later than this date to comply with the 90/180 rule.',
       errNoEntry: 'Please enter your planned entry date.',
       errEmptyPeriod: 'Fill in all dates in all periods or remove empty ones.',
@@ -1343,6 +1431,15 @@
     if (mod10 === 1) return 'день';
     if (mod10 >= 2 && mod10 <= 4) return 'дні';
     return 'днів';
+  }
+
+  function closeInfoPopup() {
+    document.getElementById('infoPopupOverlay').classList.add('hidden');
+  }
+
+  function openInfoPopup() {
+    document.getElementById('infoPopupText').innerHTML = t('infoPopupText');
+    document.getElementById('infoPopupOverlay').classList.remove('hidden');
   }
 
   function closePopup() {
@@ -1761,6 +1858,24 @@
     var remaining = 90 - daysInWindow;
     var allowed = remaining > 0;
 
+    // Пошук наступної дозволеної дати вʼїзду (якщо заборонено)
+    var nextAllowedDate = null;
+    if (!allowed) {
+      var check = addDays(entryDate, 1);
+      for (var nc = 0; nc < 365; nc++) {
+        var nwStart = addDays(check, -179);
+        var nDays = 0;
+        for (var nk = 0; nk < periods.length; nk++) {
+          var np = periods[nk];
+          var nos = np.start < nwStart ? nwStart : np.start;
+          var noe = np.end < check ? np.end : addDays(check, -1);
+          if (nos <= noe) nDays += daysBetween(nos, noe) + 1;
+        }
+        if (nDays < 90) { nextAllowedDate = check; break; }
+        check = addDays(check, 1);
+      }
+    }
+
     var exitDate = null;
     if (allowed) {
       var cur = new Date(entryDate.getTime());
@@ -1808,6 +1923,7 @@
         '<div class="stat-row stat-row-vertical"><div class="stat-label">' + t('analysisWindow') + '</div><div class="stat-value highlight">' + formatDate(windowStart) + ' — ' + formatDate(entryDate) + '</div></div>' +
         '<div class="stat-row"><div class="stat-label">' + t('daysUsed') + '</div><div class="stat-value ' + (daysInWindow >= 90 ? 'danger' : daysInWindow >= 70 ? 'warn' : '') + '">' + daysInWindow + ' ' + pluralDays(daysInWindow) + '</div></div>' +
         '<div class="stat-row"><div class="stat-label">' + t('daysLeft') + '</div><div class="stat-value ' + valClass + '">' + Math.max(0, remaining) + ' ' + pluralDays(Math.max(0, remaining)) + '</div></div>' +
+        (!allowed && nextAllowedDate ? '<div class="stat-row"><div class="stat-label">' + t('nextAllowed') + '</div><div class="stat-value highlight">' + formatDate(nextAllowedDate) + '</div></div>' : '') +
       '</div>';
     res.classList.remove('hidden');
 
@@ -1815,7 +1931,7 @@
     if (allowed && exitDate) {
       var tripDays = daysBetween(entryDate, exitDate) + 1;
       ext.innerHTML =
-        '<div class="exit-title">' + t('lastExitDay') + '</div>' +
+        '<div class="exit-title"><span>' + t('lastExitDay') + '</span><button type="button" class="info-icon-btn" onclick="openInfoPopup()">i</button></div>' +
         '<div class="exit-date">' + formatDate(exitDate) + '</div>' +
         '<div class="exit-note">' + t('exitNote').replace('%d', tripDays).replace('%u', pluralDays(tripDays)) + '</div>';
       ext.classList.remove('hidden');
