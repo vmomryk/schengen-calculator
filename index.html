@@ -28,6 +28,24 @@
     --font-body: 'IBM Plex Sans', sans-serif;
   }
 
+  html.light {
+    --bg: #f0f4f8;
+    --surface: #ffffff;
+    --surface2: #e8eef5;
+    --border: #c8d8e8;
+    --accent: #0075ff;
+    --accent2: #0055cc;
+    --green: #00a855;
+    --red: #e02040;
+    --amber: #d08000;
+    --text: #0d1f35;
+    --muted: #5a7a9a;
+  }
+
+  body, header, .popup-overlay, .cal-overlay, .cal-sheet, .popup {
+    transition: background-color 0.2s, color 0.2s, border-color 0.2s;
+  }
+
   * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 
   body {
@@ -72,7 +90,7 @@
   header {
     padding: 20px 20px 16px;
     border-bottom: 1px solid var(--border);
-    background: rgba(5,16,31,0.9);
+    background: var(--bg);
     backdrop-filter: blur(12px);
     position: sticky;
     top: 0;
@@ -97,6 +115,8 @@
     flex-direction: column;
     gap: 2px;
   }
+
+
 
   .lang-btn {
     background: transparent;
@@ -272,6 +292,22 @@
   @keyframes slideIn {
     from { opacity: 0; transform: translateY(-8px); }
     to { opacity: 1; transform: translateY(0); }
+  }
+
+  html.light body::before {
+    background:
+      radial-gradient(ellipse 60% 40% at 80% 10%, rgba(0,117,255,0.05) 0%, transparent 60%),
+      radial-gradient(ellipse 50% 50% at 10% 80%, rgba(0,85,204,0.04) 0%, transparent 60%);
+  }
+
+  html.light .grid-bg {
+    background-image:
+      linear-gradient(rgba(0,117,255,0.04) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,117,255,0.04) 1px, transparent 1px);
+  }
+
+  html.light input[type="date"] {
+    color-scheme: light;
   }
 
   /* CALENDAR */
@@ -1103,6 +1139,7 @@
     </div>
     <div class="lang-switcher">
       <button type="button" class="lang-btn active" id="mainLangBtn" onclick="setLang(currentLang === 'ua' ? 'en' : 'ua')">EN</button>
+      <button type="button" class="lang-btn active" id="themeBtn" onclick="toggleTheme()">☀</button>
     </div>
     <div class="subtitle" data-i18n="subtitle">Калькулятор 90/180 днів</div>
   </header>
@@ -1161,6 +1198,25 @@
   </div>
 </div>
 <script>
+  var currentTheme = 'dark';
+
+  function applyTheme(theme) {
+    currentTheme = theme;
+    if (theme === 'light') {
+      document.documentElement.classList.add('light');
+      document.getElementById('themeBtn').textContent = '☾';
+    } else {
+      document.documentElement.classList.remove('light');
+      document.getElementById('themeBtn').textContent = '☀';
+    }
+  }
+
+  function toggleTheme() {
+    var next = currentTheme === 'dark' ? 'light' : 'dark';
+    applyTheme(next);
+    try { localStorage.setItem('schengen_theme', next); } catch(ex) {}
+  }
+
   var periodCount = 0;
   var currentLang = 'ua';
 
@@ -1789,6 +1845,16 @@
   }
 
   document.getElementById('entryDate').valueAsDate = new Date();
+  try {
+    var savedTheme = localStorage.getItem('schengen_theme');
+    if (savedTheme) {
+      applyTheme(savedTheme);
+    } else {
+      // Системна тема пристрою
+      var prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+      applyTheme(prefersDark ? 'dark' : 'light');
+    }
+  } catch(ex) { applyTheme('dark'); }
   try {
     var savedLang = localStorage.getItem('schengen_lang');
     if (savedLang) {
