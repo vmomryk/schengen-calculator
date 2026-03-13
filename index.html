@@ -886,7 +886,8 @@
   .result-allowed .result-icon { background: rgba(0,232,122,0.15); border: 1px solid rgba(0,232,122,0.3); color: var(--green); }
   .result-denied .result-icon { background: rgba(255,59,92,0.15); border: 1px solid rgba(255,59,92,0.3); color: var(--red); }
 
-  .result-verdict { font-family: var(--font-display); font-size: 26px; letter-spacing: 2px; line-height: 1.1; }
+  .result-verdict { font-family: var(--font-display); font-size: 26px; letter-spacing: 2px; line-height: 1.1; white-space: nowrap; }
+  .result-denied .result-verdict { font-size: 22px; letter-spacing: 1px; }
   .result-allowed .result-verdict { color: var(--green); }
   .result-denied .result-verdict { color: var(--red); }
   .result-sub { font-size: 15px; color: var(--muted); font-family: var(--font-mono); margin-top: 2px; }
