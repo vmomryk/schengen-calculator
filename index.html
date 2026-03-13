@@ -243,6 +243,24 @@
     cursor: pointer;
   }
 
+  .date-display-wrap {
+    position: relative;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 12px 14px;
+    cursor: pointer;
+    text-align: center;
+  }
+
+  .date-display-text {
+    font-family: var(--font-mono);
+    font-size: 16px;
+    color: var(--text);
+    text-align: center;
+    pointer-events: none;
+  }
+
   .period-list { display: flex; flex-direction: column; gap: 8px; margin-top: 8px; }
 
   .period-item {
@@ -1241,7 +1259,10 @@
     <div class="section-label" data-i18n="plannedEntry">Запланований вʼїзд</div>
     <div class="date-card">
       <div class="date-label" data-i18n="entryDateLabel">Дата вʼїзду до Шенгену</div>
-      <input type="date" id="entryDate">
+      <div class="date-display-wrap" onclick="document.getElementById('entryDate').showPicker ? document.getElementById('entryDate').showPicker() : document.getElementById('entryDate').click()">
+        <div class="date-display-text" id="entryDateDisplay">—</div>
+        <input type="date" id="entryDate" style="position:absolute;opacity:0;width:100%;height:100%;top:0;left:0;cursor:pointer;">
+      </div>
     </div>
   </div>
 
@@ -1974,9 +1995,23 @@
     periodCount = 0;
     try { localStorage.removeItem('schengen_periods'); } catch(ex) {}
     document.getElementById('entryDate').valueAsDate = new Date();
+    updateEntryDisplay();
   }
 
+  function updateEntryDisplay() {
+    var val = document.getElementById('entryDate').value;
+    var disp = document.getElementById('entryDateDisplay');
+    if (val) {
+      disp.textContent = formatDate(parseDate(val));
+    } else {
+      disp.textContent = '—';
+    }
+  }
+
+  document.getElementById('entryDate').addEventListener('change', updateEntryDisplay);
+
   document.getElementById('entryDate').valueAsDate = new Date();
+  updateEntryDisplay();
   try {
     var savedTheme = localStorage.getItem('schengen_theme');
     if (savedTheme) {
